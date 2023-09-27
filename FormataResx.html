@@ -1,0 +1,115 @@
+<html>
+    <head>
+        <style>
+            .container{
+                display:flex;
+            }
+            textarea{
+                height: 45vh;
+                display: block;
+                width: 80vw;
+            }
+            label{
+                display: block;
+            }
+        </style>
+    </head>
+    <body>
+        <label for="entrada">Digite a classe C#</label>
+        <div class="container">
+            <textarea height="50vh" id="entrada"></textarea>
+        </div>
+        <button onclick="printar()">Formatar</button>
+
+        <label for="saida">Resultado Resx</label>
+        <div class="container">
+            <textarea height="50vh" id="saida"></textarea>
+        </div>
+    </body>
+</html>
+
+<script>
+// var classe =` public int Id { get; set; }
+
+// [Display(ResourceType = typeof(Universal.Tois.Fabrica.Web.App_GlobalResources.Operacoes.ControlarRemovidoSubGrid), Name = nameof(App_GlobalResources.Operacoes.ControlarRemovidoSubGrid.labelCaixa))]
+// [DataType(@"Kendo/String")]
+// public string CaixaRemovidoDescricao { get; set; }
+
+// [Display(ResourceType = typeof(Universal.Tois.Fabrica.Web.App_GlobalResources.Operacoes.ControlarRemovidoSubGrid), Name = nameof(App_GlobalResources.Operacoes.ControlarRemovidoSubGrid.labelDataInicio))]
+// [DataType(@"Kendo/DateTime")]
+// public DateTime DataCriacao { get; set; }
+
+// [Display(ResourceType = typeof(Universal.Tois.Fabrica.Web.App_GlobalResources.Operacoes.ControlarRemovidoSubGrid), Name = nameof(App_GlobalResources.Operacoes.ControlarRemovidoSubGrid.labelDataPesagem))]
+// [DataType(@"Kendo/String")]
+// public string TipoRemovidoDescricao { get; set; }
+
+// [Display(ResourceType = typeof(Universal.Tois.Fabrica.Web.App_GlobalResources.Operacoes.ControlarRemovidoSubGrid), Name = nameof(App_GlobalResources.Operacoes.ControlarRemovidoSubGrid.labelDataPesagem))]
+// [DataType(@"Kendo/String")]
+// public string LocalTipoRemovidoDescricao { get; set; }
+
+// [Display(ResourceType = typeof(Universal.Tois.Fabrica.Web.App_GlobalResources.Operacoes.ControlarRemovidoSubGrid), Name = nameof(App_GlobalResources.Operacoes.ControlarRemovidoSubGrid.labelDataPesagem))]
+// [DataType(@"Kendo/String")]
+// public string Responsavel { get; set; }`
+
+var classe = document.getElementById("entrada");
+
+function AdicionarEspacos(propriedade){
+    var saida = "";
+
+    for (let index = 0; index < propriedade.length; index++) {
+
+        var letra = propriedade[index];
+        var letraEhMaiuscula = letra == letra.toUpperCase();
+        if(letraEhMaiuscula){
+           saida += " "; 
+        }
+        saida += letra;
+    }
+
+    return saida;
+}
+
+function formataLinhaResx(propriedade){
+    var propriedadeComEspacos = AdicionarEspacos(propriedade);
+    return `label${propriedade}    ${propriedadeComEspacos}`;
+}
+
+
+function leiaCaracteres(classe){
+    var resourcesNames = [];
+
+    var linhas = classe.split("\n");
+    for (let index = 0; index < linhas.length; index++) {
+
+        var linha = linhas[index];
+
+        var contemPublic = linha.indexOf("public") != -1;
+
+        if(contemPublic){
+            var indicePublic = linha.indexOf("public");
+            var nomePropriedade = linha.substr(indicePublic).split(" ")[2];
+
+            var resourceLinha = formataLinhaResx(nomePropriedade);
+            resourcesNames.push(resourceLinha);
+        }
+    }
+    
+    return resourcesNames;
+}
+
+function printar(){
+    var entradaString = entrada.value;
+    const entradaContemValor =  entradaString != undefined;
+    if(entradaContemValor){
+        var saida = document.getElementById("saida");
+        
+        var lista = leiaCaracteres(entradaString);
+        lista.forEach(item => {
+            saida.innerHTML += item + "\n";
+        });
+        
+    }
+}
+
+
+</script>

@@ -1,0 +1,97 @@
+<html>
+    <head>
+        <style>
+            .container{
+                display:flex;
+            }
+            textarea{
+                height: 45vh;
+                display: block;
+                width: 80vw;
+            }
+            label{
+                display: block;
+            }
+        </style>
+    </head>
+    <body>
+        <label for="controller">Digite o nome do controller :</label>
+        <div class="container">
+        <input width="400px" id="controller">
+        </div>
+        <label for="solution">Digite o nome da Solution :</label>
+        <div class="container">
+        <input width="400px" id="solution">
+        </div>
+        <label for="area">Digite o nome da Area :</label>
+        <div class="container">
+        <input width="400px" id="area">
+        </div>
+        <label for="entrada">Digite a classe C#</label>
+        <div class="container">
+            <textarea height="50vh" id="entrada"></textarea>
+        </div>
+        <button onclick="RetornaDataAnotations()">Formatar</button>
+
+        <label for="saida">Resultado Resx</label>
+        <div class="container">
+            <textarea height="50vh" id="saida"></textarea>
+        </div>
+    </body>
+</html>
+
+<script>
+
+var classe = document.getElementById("entrada");
+
+
+function formataAnnotation(solutionName,areaName, controllerName, propertyName){
+    return `[Display(ResourceType = typeof(Universal.Tois.${solutionName}.Web.App_GlobalResources.${areaName}.${controllerName}),
+                                    Name =  nameof(App_GlobalResources.${areaName}.${controllerName}.label${propertyName}))]`
+}
+
+function retornaPropriedadeComDataAnotation(classe){
+    var saida = "";
+    var nomeSolucao = solution.value;
+    var nomeArea = area.value;
+    var nomeController = controller.value;
+
+    var linhas = classe.split("\n");
+    for (let index = 0; index < linhas.length; index++) {
+
+        var linha = linhas[index];
+
+        var contemPublic = linha.indexOf("public") != -1;
+
+        if(contemPublic){
+            var indicePublic = linha.indexOf("public");
+
+            if(linha.indexOf("class") != -1)
+                continue;
+
+            var nomePropriedade = linha.substr(indicePublic).split(" ")[2];
+
+            saida +=  formataAnnotation(nomeSolucao, nomeArea, nomeController, nomePropriedade) + "\n" ;
+            linha += "\n";
+        }
+
+        saida += linha;
+    }
+    
+    return saida;
+}
+
+function RetornaDataAnotations(){
+    var entradaString = entrada.value;
+    var controlador = controller.value;
+
+    const entradaContemValor =  entradaString != undefined;
+
+    if(entradaContemValor){
+        var saida = document.getElementById("saida");
+        saida.innerHTML = retornaPropriedadeComDataAnotation(entradaString);
+    }
+}
+
+
+</script>
