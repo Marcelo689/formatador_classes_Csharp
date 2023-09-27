@@ -29,27 +29,6 @@
 </html>
 
 <script>
-// var classe =` public int Id { get; set; }
-
-// [Display(ResourceType = typeof(Universal.Tois.Fabrica.Web.App_GlobalResources.Operacoes.ControlarRemovidoSubGrid), Name = nameof(App_GlobalResources.Operacoes.ControlarRemovidoSubGrid.labelCaixa))]
-// [DataType(@"Kendo/String")]
-// public string CaixaRemovidoDescricao { get; set; }
-
-// [Display(ResourceType = typeof(Universal.Tois.Fabrica.Web.App_GlobalResources.Operacoes.ControlarRemovidoSubGrid), Name = nameof(App_GlobalResources.Operacoes.ControlarRemovidoSubGrid.labelDataInicio))]
-// [DataType(@"Kendo/DateTime")]
-// public DateTime DataCriacao { get; set; }
-
-// [Display(ResourceType = typeof(Universal.Tois.Fabrica.Web.App_GlobalResources.Operacoes.ControlarRemovidoSubGrid), Name = nameof(App_GlobalResources.Operacoes.ControlarRemovidoSubGrid.labelDataPesagem))]
-// [DataType(@"Kendo/String")]
-// public string TipoRemovidoDescricao { get; set; }
-
-// [Display(ResourceType = typeof(Universal.Tois.Fabrica.Web.App_GlobalResources.Operacoes.ControlarRemovidoSubGrid), Name = nameof(App_GlobalResources.Operacoes.ControlarRemovidoSubGrid.labelDataPesagem))]
-// [DataType(@"Kendo/String")]
-// public string LocalTipoRemovidoDescricao { get; set; }
-
-// [Display(ResourceType = typeof(Universal.Tois.Fabrica.Web.App_GlobalResources.Operacoes.ControlarRemovidoSubGrid), Name = nameof(App_GlobalResources.Operacoes.ControlarRemovidoSubGrid.labelDataPesagem))]
-// [DataType(@"Kendo/String")]
-// public string Responsavel { get; set; }`
 
 var classe = document.getElementById("entrada");
 
@@ -71,7 +50,8 @@ function AdicionarEspacos(propriedade){
 
 function formataLinhaResx(propriedade){
     var propriedadeComEspacos = AdicionarEspacos(propriedade);
-    return `label${propriedade}    ${propriedadeComEspacos}`;
+    return `label${propriedade}	${propriedadeComEspacos}	
+`;
 }
 
 
@@ -86,6 +66,12 @@ function leiaCaracteres(classe){
         var contemPublic = linha.indexOf("public") != -1;
 
         if(contemPublic){
+
+            var linhaNomeDaClasse = linha.indexOf("class") != -1;
+
+            if(linhaNomeDaClasse)
+                continue;
+
             var indicePublic = linha.indexOf("public");
             var nomePropriedade = linha.substr(indicePublic).split(" ")[2];
 
