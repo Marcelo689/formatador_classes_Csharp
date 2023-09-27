@@ -6,6 +6,3 @@
 <video width="800px" height="400px" controls>
   <source src="assets/demonstracao.mp4" type="video/mp4">
 </video>
-
-<iframe width="800" height="400" src="assets/demonstracao.mp4">
-</iframe>
