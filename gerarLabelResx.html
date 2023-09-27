@@ -46,7 +46,7 @@ var classe = document.getElementById("entrada");
 
 
 function formataAnnotation(solutionName,areaName, controllerName, propertyName){
-    return `[Display(ResourceType = typeof(Universal.Tois.${solutionName}.Web.App_GlobalResources.${areaName}.${controllerName}),
+    return `\n      [Display(ResourceType = typeof(${solutionName}.Web.App_GlobalResources.${areaName}.${controllerName}),
                                     Name =  nameof(App_GlobalResources.${areaName}.${controllerName}.label${propertyName}))]`
 }
 
@@ -66,8 +66,10 @@ function retornaPropriedadeComDataAnotation(classe){
         if(contemPublic){
             var indicePublic = linha.indexOf("public");
 
-            if(linha.indexOf("class") != -1)
+            if(linha.indexOf("class") != -1){
+                saida += "\n" + linha;
                 continue;
+            }
 
             var nomePropriedade = linha.substr(indicePublic).split(" ")[2];
 
