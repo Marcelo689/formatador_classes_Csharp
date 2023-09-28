@@ -45,9 +45,32 @@
 var classe = document.getElementById("entrada");
 
 
+function retornaCaminhoDataType(tipoVariavel){
+    const caminhoTemplate = "Kendo\\";
+    const TypeTemplate = {
+        string : "String",
+        decimal: "Decimal_6_2",
+        int : "Integer",
+        Datetime : "Datetime",
+    };
+
+    const DataType = `[DataType("${caminhoTemplate}${TypeTemplate[typeof(tipoVariavel)]}")]`;
+
+    return DataType;
+}
+
 function formataAnnotation(solutionName,areaName, controllerName, propertyName){
     return `\n      [Display(ResourceType = typeof(${solutionName}.Web.App_GlobalResources.${areaName}.${controllerName}),
                                     Name =  nameof(App_GlobalResources.${areaName}.${controllerName}.label${propertyName}))]`
+}
+
+function contemPalavrasIndesejadas(palavra, palavrasIndesejadas){
+
+    var listaPalavrasExcluidas = ["id", "class"];
+
+    listaPalavrasExcluidas.forEach(palavra => {
+        var indice = palavra.indexOf("")
+    });
 }
 
 function retornaPropriedadeComDataAnotation(classe){
@@ -55,6 +78,7 @@ function retornaPropriedadeComDataAnotation(classe){
     var nomeSolucao = solution.value;
     var nomeArea = area.value;
     var nomeController = controller.value;
+    
 
     var linhas = classe.split("\n");
     for (let index = 0; index < linhas.length; index++) {
@@ -66,7 +90,7 @@ function retornaPropriedadeComDataAnotation(classe){
         if(contemPublic){
             var indicePublic = linha.indexOf("public");
 
-            if(linha.indexOf("class") != -1){
+            if(linha.indexOf("class")){
                 saida += "\n" + linha;
                 continue;
             }
