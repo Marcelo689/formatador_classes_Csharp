@@ -89,6 +89,7 @@ function formataLinhaResx(propriedade){
 `;
 }
 
+
 function leiaCaracteres(classe){
     var resourcesNames = [];
 
@@ -105,12 +106,13 @@ function leiaCaracteres(classe){
         if(contemPublic){
 
             var linhaNomeDaClasse = linha.indexOf("class") != -1;
+
             if(linhaNomeDaClasse)
                 continue;
 
             var tipoPropriedade = linha.substr(indicePublic).split(" ")[1];
             var nomePropriedade = linha.substr(indicePublic).split(" ")[2];
-            
+
             if(listaPalavrasExcluidas.includes(nomePropriedade.toLowerCase()))
                 continue;
 

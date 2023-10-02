@@ -61,7 +61,7 @@ function retornaCaminhoDataType(tipoVariavel){
 
 function formataAnnotation(solutionName,areaName, controllerName, propertyName){
     return `\n      [Display(ResourceType = typeof(${solutionName}.Web.App_GlobalResources.${areaName}.${controllerName}),
-                                    Name =  nameof(App_GlobalResources.${areaName}.${controllerName}.label${propertyName}))]`
+                                    Name =  nameof(Web.App_GlobalResources.${areaName}.${controllerName}.label${propertyName}))]`
 }
 
 function contemPalavrasIndesejadas(palavra, palavrasIndesejadas){
@@ -90,7 +90,9 @@ function retornaPropriedadeComDataAnotation(classe){
         if(contemPublic){
             var indicePublic = linha.indexOf("public");
 
-            if(linha.indexOf("class")){
+            var contemClass =linha.indexOf("class") != -1;
+
+            if(contemClass){
                 saida += "\n" + linha;
                 continue;
             }
