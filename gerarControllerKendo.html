@@ -38,41 +38,42 @@
     </div>
 
     <script>
-        function gerarControlador(){  
-            var NomeController = controlador.value;
-            var nomeAnexoAcoes   = nomeAnexo.value; 
-            var arquivoControllador =  
+function gerarControlador(){  
+    var NomeController = controlador.value;
+    var nomeAnexoAcoes   = nomeAnexo.value; 
+    var arquivoControllador =  
         `\npublic class ${NomeController}Controller : Controller {\n
-        public I${NomeController}AppService i${NomeController}AppService { get;}
-        public ${NomeController}Controller(I${NomeController}AppService i${NomeController}AppService)
-        {
-            i${NomeController}AppService = i${NomeController}AppService;
-        }
+    public I${NomeController}AppService i${NomeController}AppService { get;}
+    public ${NomeController}Controller(I${NomeController}AppService i${NomeController}AppService)
+    {
+        i${NomeController}AppService = i${NomeController}AppService;
+    }
 
-        public ActionResult Index(){
-            return View();
-        }
+    public ActionResult Index(){
+        return View();
+    }
 
-        public ActionResult Inserir${nomeAnexoAcoes}(${NomeController}TO to)
-        {
-            // Implemente a lógica para criar um novo produto.
-            return Json(new { sucesso = true });
-        }
+    public ActionResult Read${nomeAnexoAcoes}([DataSourceRequest] DataSourceRequest request, Filtro${NomeController}ViewModel filtro){
+        return View();
+    }
 
-        public ActionResult Atualizar${nomeAnexoAcoes}(${NomeController}TO to)
-        {
-            // Implemente a lógica para atualizar um produto existente.
-            return Json(new { sucesso = true });
-        }
+    public ActionResult Inserir${nomeAnexoAcoes}(${NomeController}TO to)
+    {
+        return Json(new { sucesso = true });
+    }
 
-        public ActionResult Excluir${nomeAnexoAcoes}(int id)
-        {
-            // Implemente a lógica para excluir um produto com base no ID.
-            return Json(new { sucesso = true });
-        }
+    public ActionResult Atualizar${nomeAnexoAcoes}(${NomeController}TO to)
+    {
+        return Json(new { sucesso = true });
+    }
+
+    public ActionResult Remover${nomeAnexoAcoes}(int id)
+    {
+        return Json(new { sucesso = true });
+    }
 }`
-            saida.innerHTML = arquivoControllador;
-        }
+    saida.innerHTML = arquivoControllador;
+}
 
     </script>
 </body>

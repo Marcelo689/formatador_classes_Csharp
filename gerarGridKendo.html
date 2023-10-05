@@ -16,8 +16,8 @@
     </head>
     <body>
         <div class="container">
-            <label for="nomeClasse">Digite o nome da classe :</label>
-            <input width="400px" id="nomeClasse">
+            <label for="classeReduzida">Digite o nome da classe Reduzida :</label>
+            <input width="400px" id="classeReduzida">
         </div>
         <div class="container">
             <label for="controller">Digite o nome do controller :</label>
@@ -49,12 +49,11 @@
 var classe = document.getElementById("entrada");
 
 function CriarGrid(){
-
-    var classeNome      = nomeClasse.value;
-    var classeCompleta  = entrada.value;
-    var controllerName  = controller.value;
-    var nomeSolucao     = solucao.value;
-    var areaName        = area.value; 
+    var classeCompleta     = entrada.value;     
+    var nomeReduzidoClasse = classeReduzida.value;
+    var controllerName     = controller.value;
+    var nomeSolucao        = solucao.value;
+    var areaName           = area.value; 
     var numeroPropriedades = 10;
 
     var cabecalho = `
@@ -63,20 +62,20 @@ function CriarGrid(){
 
     @{
         const string CONTROLLER_NAME = "${controllerName}";
-        object AREA = "${areaName}";
+        object AREA = "${controllerName}";
         var estiloColunaInteira      = new { style = "text-align:right" };
         var estiloColunaString       = new { style = "text-align:left" };
         var estiloColunaCentralizada = new { style = "text-align:center" };
 
         var tamanhoPaginaInicial = 10;
         
-        int numeroColunas = 
+        int numeroColunas = ${numeroPropriedades};
         var larguraPorColuna = 100 / numeroColunas;
         var percentualLargura = larguraPorColuna.ToString() + "%";
     }\n\n
     `
     var grid = cabecalho +
-    `@(Html.Kendo().Grid<${classeNome}>()
+    `@(Html.Kendo().Grid<${controllerName}ViewModel>()
         .Name("grid")
         .Pageable(pageable => pageable.
             PageSizes( new int[]{ tamanhoPaginaInicial, tamanhoPaginaInicial *2 , tamanhoPaginaInicial * 3})
@@ -96,9 +95,9 @@ function CriarGrid(){
         .Ajax()
         .PageSize(tamanhoPaginaInicial)
         .Read(read => read.Action("Read", CONTROLLER_NAME, AREA}))
-        .Create(create => create.Action("Create", CONTROLLER_NAME, AREA}))
-        .Update(update => update.Action("Update", CONTROLLER_NAME, AREA}))
-        .Destroy(destroy => destroy.Action("Delete", CONTROLLER_NAME, AREA}))
+        .Create(create => create.Action("Inserir${nomeReduzidoClasse}", CONTROLLER_NAME, AREA}))
+        .Update(update => update.Action("Atualizar${nomeReduzidoClasse}", CONTROLLER_NAME, AREA}))
+        .Destroy(destroy => destroy.Action("Remover${nomeReduzidoClasse}", CONTROLLER_NAME, AREA}))
     )`
 
     saida.innerHTML = grid;
