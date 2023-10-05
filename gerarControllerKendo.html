@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerar Controller</title>
+    <style>
+        .container{
+            display:flex;
+        }
+        textarea{
+            height: 45vh;
+            display: block;
+            width: 80vw;
+        }
+        label{
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <label for="controlador">Digite o nome controlador :</label>
+        <input width="400px" id="controlador">
+    </div>
+    <div class="container">
+        <label for="nomeAnexo">Digite o nome anexo :</label>
+        <input width="400px" id="nomeAnexo">
+    </div>
+    <div class="container">
+        <textarea height="50vh" id="entrada"></textarea>
+    </div>
+    <button onclick="gerarControlador()">Formatar</button>
+
+    <label for="saida">Resultado Resx</label>
+    <div class="container">
+        <textarea height="50vh" id="saida"></textarea>
+    </div>
+
+    <script>
+        function gerarControlador(){  
+            var NomeController = controlador.value;
+            var nomeAnexoAcoes   = nomeAnexo.value; 
+            var arquivoControllador =  
+        `\npublic class ${NomeController}Controller : Controller {\n
+        public I${NomeController}AppService i${NomeController}AppService { get;}
+        public ${NomeController}Controller(I${NomeController}AppService i${NomeController}AppService)
+        {
+            i${NomeController}AppService = i${NomeController}AppService;
+        }
+
+        public ActionResult Index(){
+            return View();
+        }
+
+        public ActionResult Inserir${nomeAnexoAcoes}(${NomeController}TO to)
+        {
+            // Implemente a lógica para criar um novo produto.
+            return Json(new { sucesso = true });
+        }
+
+        public ActionResult Atualizar${nomeAnexoAcoes}(${NomeController}TO to)
+        {
+            // Implemente a lógica para atualizar um produto existente.
+            return Json(new { sucesso = true });
+        }
+
+        public ActionResult Excluir${nomeAnexoAcoes}(int id)
+        {
+            // Implemente a lógica para excluir um produto com base no ID.
+            return Json(new { sucesso = true });
+        }
+}`
+            saida.innerHTML = arquivoControllador;
+        }
+
+    </script>
+</body>
+</html>
