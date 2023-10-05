@@ -61,7 +61,7 @@ function retornaCaminhoDataType(tipoVariavel){
 
 function formataAnnotation(solutionName,areaName, controllerName, propertyName){
     return `\n      [Display(ResourceType = typeof(${solutionName}.Web.App_GlobalResources.${areaName}.${controllerName}),
-                                    Name =  nameof(Web.App_GlobalResources.${areaName}.${controllerName}.label${propertyName}))]`
+        Name =  nameof(Web.App_GlobalResources.${areaName}.${controllerName}.label${propertyName}))]`
 }
 
 function contemPalavrasIndesejadas(palavra, palavrasIndesejadas){
@@ -81,6 +81,7 @@ function retornaPropriedadeComDataAnotation(classe){
     var listaPropriedades = [];
 
     var linhas = classe.split("\n");
+
     for (let index = 0; index < linhas.length; index++) {
 
         var linha = linhas[index];
@@ -90,10 +91,10 @@ function retornaPropriedadeComDataAnotation(classe){
         if(contemPublic){
             var indicePublic = linha.indexOf("public");
 
-            var contemClass =linha.indexOf("class") != -1;
+            var contemClass = linha.indexOf("class") != -1;
 
             if(contemClass){
-                saida += "\n" + linha;
+                saida += "\n" + linha  + "\n";
                 continue;
             }
 
@@ -106,6 +107,10 @@ function retornaPropriedadeComDataAnotation(classe){
 
         if(index == linhas.length -2){
             saida += gerarExplictCast(nomeController, listaPropriedades);
+        }
+
+        if(index == linhas.length - 1 ){
+            saida += "\n";
         }
 
         saida += linha;
@@ -123,8 +128,8 @@ function gerarExplictCast(nomeClasse, listaPropriedades){
         
         propriedadesCast += `                ${propriedade} = to.${propriedade},\n`
     }
-        explicitoCast += propriedadesCast +`        };
-    }`;
+        explicitoCast += propriedadesCast +`            };
+        }\n`;
 
     return explicitoCast;
 }
