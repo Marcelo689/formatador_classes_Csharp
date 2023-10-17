@@ -61,21 +61,42 @@ function retornaCaminhoDataType(tipoVariavel){
 
 function formataAnnotation(solutionName,areaName, controllerName, propertyName){
     return `\n      [Display(ResourceType = typeof(${solutionName}.Web.App_GlobalResources.${areaName}.${controllerName}),
-        Name =  nameof(Web.App_GlobalResources.${areaName}.${controllerName}.label${propertyName}))]`
+        Name = nameof(Web.App_GlobalResources.${areaName}.${controllerName}.label${propertyName}))]`
 }
 
-function contemPalavrasIndesejadas(palavra, palavrasIndesejadas){
+function ignorarLinhaCasoConterPalavrasChave(linha){
+
+    var listaPalavrasExcluidas = [ "[Display(","nameof(", "typeof("];
+
+    return contemNaLista(linha, listaPalavrasExcluidas);
+}
+
+function contemPalavrasIndesejadas(palavra){
 
     var listaPalavrasExcluidas = ["id", "class"];
 
-    for (let index = 0; index < listaPalavrasExcluidas.length; index++) {
-        const item = listaPalavrasExcluidas[index];
+    return contemNaLista(palavra, listaPalavrasExcluidas);
+}
+
+function contemNaLista(palavra, lista){
+    for (let index = 0; index < lista.length; index++) {
+        const item = lista[index];
         if(palavra.toLowerCase().indexOf(item.toLowerCase()) != -1){
             return true;
         }
     }
 
     return false;
+}
+
+function casoEncontrarXIgnorarAteProximoY(linha, condicaoParada, nVezes, encontradosNVezes){
+    var linhaContemCondicao = linha.indexOf(condicaoParada) != -1;
+
+    if(linhaContemCondicao){
+        encontradosNVezes++
+    }
+
+    return encontradosNVezes;
 }
 
 function retornaPropriedadeComDataAnotation(classe){
@@ -85,20 +106,43 @@ function retornaPropriedadeComDataAnotation(classe){
     var nomeController = controller.value;
     var listaPropriedades = [];
     var nomeClasse = nomeController;
+    var explicitOperador = "public static explicit operator";
 
     var linhas = classe.split("\n");
+
+    var encontradosNVezes = 0;
+    var numeroNDesejaEncontrar = 2;
+    var estaIgnorandoLinhas = false;
 
     for (let index = 0; index < linhas.length; index++) {
 
         var linha = linhas[index];
 
+        if(ignorarLinhaCasoConterPalavrasChave(linha)){
+            continue;
+        }
+
+        var linhaContemExplicitCast = linha.indexOf(explicitOperador) != -1;
+        if(linhaContemExplicitCast || estaIgnorandoLinhas){
+            estaIgnorandoLinhas = true;
+            encontradosNVezes = casoEncontrarXIgnorarAteProximoY(linha, "}", numeroNDesejaEncontrar , encontradosNVezes);
+        }
+
+        if(encontradosNVezes == numeroNDesejaEncontrar){
+            estaIgnorandoLinhas = false;
+            encontradosNVezes = 0;
+            continue;
+        }
+
+        if(estaIgnorandoLinhas){
+            continue;
+        }
         var contemPublic = linha.indexOf("public") != -1;
 
         if(contemPublic){
             var indicePublic = linha.indexOf("public");
-
             var contemClass = linha.indexOf("class") != -1;
-
+            
             if(contemClass){
                 nomeClasse = linha.trimLeft().split(" ")[2];
 
@@ -146,7 +190,6 @@ function gerarExplictCast(nomeClasse, listaPropriedades){
     return explicitoCast;
 }
 
-
 function RetornaDataAnotations(){
     var entradaString = entrada.value;
     var controlador = controller.value;
@@ -158,6 +201,5 @@ function RetornaDataAnotations(){
         saida.innerHTML = retornaPropriedadeComDataAnotation(entradaString);
     }
 }
-
 
 </script>
