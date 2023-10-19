@@ -28,3 +28,24 @@ namespace CadastrarTemplate.Operacoes{
         }
     }
 }
+public class Pessoa{
+
+  [Display(ResourceType = typeof(Solucao.Web.App_GlobalResources.Area.Controller),
+    Name = nameof(Web.App_GlobalResources.Area.Controller.labelNome))]
+  public string Nome {get;set;}
+  public int Idade {get;set;}
+
+  [Display(ResourceType = typeof(Solucao.Web.App_GlobalResources.Area.Controller),
+    Name = nameof(Web.App_GlobalResources.Area.Controller.labelVivo))]
+
+  public static explicit operator Pessoa(PessoaTO to)
+  {
+    return new Pessoa{
+        Nome = to.Nome,
+        Idade = to.Idade,
+        Vivo = to.Vivo,
+    };
+  }
+  public bool Vivo {get;set;}
+
+}

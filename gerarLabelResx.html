@@ -74,7 +74,7 @@ function ignorarLinhaCasoConterPalavrasChave(linha){
 function contemPalavrasIndesejadas(palavra){
 
     var listaPalavrasExcluidas = ["id", "class"];
-
+    var listaPalavrasExcluidas = [];
     return contemNaLista(palavra, listaPalavrasExcluidas);
 }
 
@@ -99,6 +99,18 @@ function casoEncontrarXIgnorarAteProximoY(linha, condicaoParada, nVezes, encontr
     return encontradosNVezes;
 }
 
+function encontraIndiceUltimoCaractere(textoClasse){
+    for (let index = textoClasse.length; index > 0; index--) {
+        const element = textoClasse[index];
+
+        if(element != " " && element != "\n"){
+            return index;
+        }
+    }
+
+    return -1;
+}
+
 function retornaPropriedadeComDataAnotation(classe){
     var saida = "";
     var nomeSolucao = solution.value;
@@ -108,7 +120,9 @@ function retornaPropriedadeComDataAnotation(classe){
     var nomeClasse = nomeController;
     var explicitOperador = "public static explicit operator";
 
-    var linhas = classe.split("\n");
+    var indiceUltimo = encontraIndiceUltimoCaractere(classe);
+    var texto = classe.substring(0, indiceUltimo);
+    var linhas = texto.trimEnd().split("\n");
 
     var encontradosNVezes = 0;
     var numeroNDesejaEncontrar = 2;
@@ -144,7 +158,7 @@ function retornaPropriedadeComDataAnotation(classe){
             var contemClass = linha.indexOf("class") != -1;
             
             if(contemClass){
-                nomeClasse = linha.trimLeft().split(" ")[2];
+                nomeClasse = linha.trimLeft().split(" ")[2].replace("{","");
 
                 saida += "\n" + linha  + "\n";
                 continue;
@@ -161,14 +175,9 @@ function retornaPropriedadeComDataAnotation(classe){
             linha += "\n";
         }
 
-        if(index == linhas.length -2){
+        if(index == linhas.length -1){
             saida += gerarExplictCast(nomeClasse, listaPropriedades);
         }
-
-        if(index == linhas.length - 1 ){
-            saida += "\n";
-        }
-
         saida += linha;
     }
     
@@ -202,4 +211,18 @@ function RetornaDataAnotations(){
     }
 }
 
+var texto1correto = `public class Pessoa{
+
+public string Nome {get;set;}
+public int Idade {get;set;}
+public bool Vivo {get;set;}
+}
+`
+var textoincorreto = `public class Pessoa{
+
+public string Nome {get;set;}
+public int Idade {get;set;}
+public bool Vivo {get;set;}
+} 
+`;
 </script>

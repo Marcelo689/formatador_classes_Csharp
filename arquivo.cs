@@ -6,3 +6,11 @@ namespace Fabrica.Web.Areas.Operacoes.Models.CadastrarTemplate{
         public string Email { get;set; }
     }
 }
+
+public class Pessoa{
+
+    public string Nome {get;set;}
+    public int Idade {get;set;}
+    public bool Vivo {get;set;}
+}
+
