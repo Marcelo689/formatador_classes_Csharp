@@ -44,7 +44,6 @@
 
 var classe = document.getElementById("entrada");
 
-
 function retornaCaminhoDataType(tipoVariavel){
     const caminhoTemplate = "Kendo\\";
     const TypeTemplate = {
@@ -183,6 +182,7 @@ function retornaPropriedadeComDataAnotation(classe){
     
     return saida;
 }
+
 function gerarExplictCast(nomeClasse, listaPropriedades){
     var explicitoCast =  `\n        public static explicit operator ${nomeClasse}(${nomeClasse.replace("ViewModel","")}TO to)
         {
@@ -218,11 +218,13 @@ public int Idade {get;set;}
 public bool Vivo {get;set;}
 }
 `
-var textoincorreto = `public class Pessoa{
-
-public string Nome {get;set;}
-public int Idade {get;set;}
-public bool Vivo {get;set;}
-} 
+var textoincorreto = `
+    public class Pessoa{
+        public string Nome {get;set;}
+        public int Idade {get;set;}
+        public bool Vivo {get;set;}
+    } 
 `;
+
+
 </script>
