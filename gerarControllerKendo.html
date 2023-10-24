@@ -37,7 +37,20 @@
         <textarea height="50vh" id="saida"></textarea>
     </div>
 
-    <script>
+<script>
+
+function gerarArquivoController(){
+    var controllerName = controlador.value;
+
+    var textoSaida = "";
+
+    textoSaida += geraNamespace();
+    textoSaida += gerarControlador();
+    textoSaida += gerarRead();
+    textoSaida += gerarInsert();
+    textoSaida += gerarValidar();
+    textoSaida += fecharArquivo();
+}
 
 function getListProps(classe){
 
@@ -83,44 +96,7 @@ function getListProps(classe){
     return listaProps;
 }
 
-function gerarControlador(){  
-    var NomeController = controlador.value;
-    var nomeAnexoAcoes   = nomeAnexo.value; 
-    var arquivoControllador =  
-        `\npublic class ${NomeController}Controller : Controller {\n
-    public I${NomeController}AppService i${NomeController}AppService { get;}
-    public ${NomeController}Controller(I${NomeController}AppService i${NomeController}AppService)
-    {
-        i${NomeController}AppService = i${NomeController}AppService;
-    }
-
-    public ActionResult Index(){
-        return View();
-    }
-
-    public ActionResult Read${nomeAnexoAcoes}([DataSourceRequest] DataSourceRequest request, Filtro${NomeController}ViewModel filtro){
-        return View();
-    }
-
-    public ActionResult Inserir${nomeAnexoAcoes}(${NomeController}TO to)
-    {
-        return Json(new { sucesso = true });
-    }
-
-    public ActionResult Atualizar${nomeAnexoAcoes}(${NomeController}TO to)
-    {
-        return Json(new { sucesso = true });
-    }
-
-    public ActionResult Remover${nomeAnexoAcoes}(int id)
-    {
-        return Json(new { sucesso = true });
-    }
-}`
-    saida.innerHTML = arquivoControllador;
-}
-
-function geraCabecalho(){
+function geraNamespace(){
     var controllerName = controlador.value;
 
     var nomeAppServiceVariable = controllerName[0].toLowerCase() +controllerName;
@@ -133,17 +109,31 @@ function geraCabecalho(){
         #if !DEBUG
             [Authorize( Roles = "${controllerName}" )]
         #endif
-        public class ${controllerName}Controller : ToisController
-        {
-            private I${controllerName}AppService i${controllerName}AppService;
-
-            public ${controllerName}Controller(I${controllerName}AppService ${nomeAppServiceVariable}AppService)
-            {
-                i${controllerName}AppService = ${nomeAppServiceVariable}AppService;
-            }
     `;
 
     return texto;
+}
+
+function gerarControlador(){  
+    var NomeController = controlador.value;
+    var nomeAnexoAcoes   = nomeAnexo.value; 
+    var arquivoControllador =  
+        `\n
+    public class ${NomeController}Controller : Controller {\n
+
+        public I${NomeController}AppService i${NomeController}AppService { get;}
+
+        public ${NomeController}Controller(I${NomeController}AppService i${NomeController}AppService)
+        {
+            i${NomeController}AppService = i${NomeController}AppService;
+        }
+
+        public ActionResult Index(){
+            return View();
+        }
+    `
+
+    return arquivoControllador;
 }
 
 function gerarRead(){
@@ -216,14 +206,9 @@ function gerarInsert(){
     return texto;
 }
 
-function gerarValidar(){
+function gerarValidar(classe){
 
-    var listaClassePropsTipoName = [ 
-        { 
-            type : "int",
-            name : "id"
-        }
-    ];
+    var listaClassePropsTipoName = getListProps(classe);
 
     var controladorName = controlador.value;
 
@@ -305,9 +290,14 @@ function gerarValidar(){
                 this.ModelState.AddModelError(string.Empty, mensagemTamanhoMaximo);
             }
         }
-
     `
 }
-   </script>
+   
+function fecharArquivo(){
+    var textoSaida = "}\n   }";
+    return textoSaida;
+}
+
+</script>
 </body>
 </html>
