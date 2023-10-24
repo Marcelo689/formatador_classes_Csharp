@@ -30,7 +30,7 @@
     <div class="container">
         <textarea height="50vh" id="entrada"></textarea>
     </div>
-    <button onclick="gerarControlador()">Formatar</button>
+    <button onclick="gerarRead()">Formatar</button>
 
     <label for="saida">Resultado Resx</label>
     <div class="container">
@@ -75,6 +75,186 @@ function gerarControlador(){
     saida.innerHTML = arquivoControllador;
 }
 
-    </script>
+function geraCabecalho(){
+    var controllerName = controlador.value;
+
+    var nomeAppServiceVariable = controllerName[0].toLowerCase() +controllerName;
+    var texto = `
+    using Universal.Web.Mvc.Extensions;
+    using Universal.Web.Telerik.Mvc5.Extensions;
+
+    namespace Universal.Tois.${solutionName}.Web.Areas.${areaName}.Controllers
+    {
+        #if !DEBUG
+            [Authorize( Roles = "${controllerName}" )]
+        #endif
+        public class ${controllerName}Controller : ToisController
+        {
+            private I${controllerName}AppService i${controllerName}AppService;
+
+            public ${controllerName}Controller(I${controllerName}AppService ${nomeAppServiceVariable}AppService)
+            {
+                i${controllerName}AppService = ${nomeAppServiceVariable}AppService;
+            }
+    `;
+
+    return texto;
+}
+
+function gerarRead(){
+
+    var controllerName = controlador.value;
+
+    var texto = `
+        public JsonResult Read${controllerName}([DataSourceRequest] DataSourceRequest request, ${controllerName}FilterViewModel filtrosViewModel)
+        {
+            ${controllerName}FilterViewModelTO filtrosTO = (${controllerName}FilterViewModelTO) filtrosViewModel;
+
+            filtrosTO.PagingParameterTO = new PagingParameterTO(request.Page, request.PageSize);
+
+            TratarModelo(filtrosTO);
+
+            ValidationResult<PagingResult<${controllerName}ViewModel>> validationResultViewModel = new ValidationResult<PagingResult<${controllerName}ViewModel>>();
+            validationResultViewModel.Result = new PagingResult<${controllerName}ViewModel>();
+            ValidationResult<PagingResult<${controllerName}TO>> validationPaging${controllerName}TO = i${controllerName}AppService.GetLista${controllerName}(filtrosTO);
+            IEnumerable<${controllerName}TO> lista${controllerName}TO = validationPaging${controllerName}TO.Result.DataSource;
+
+            bool sucessoAoBuscarDados = validationPaging${controllerName}TO.IsValid;
+            if (sucessoAoBuscarDados)
+            {
+                bool listaPreenchida = listaNegociacaoTO != null;
+                if (listaPreenchida)
+                {
+                    validationResultViewModel.Result.DataSource = lista${controllerName}TO.Select(to => (${controllerName}ViewModel) to).ToList();
+                    validationResultViewModel.Result.Total = validationPagingPolitica${controllerName}TO.Result.Total;
+                }
+                else
+                {
+                    validationResultViewModel.ValidationResultToModelState(ModelState);
+                }
+            }
+
+            return Json(validationResultViewModel.ToDataSourceResult(request, ModelState), JsonRequestBehavior.AllowGet);
+        }`;
+
+    return texto;
+}
+    
+function gerarInsert(){
+    var controllerName = controlador.value;
+
+    var texto = `
+        public JsonResult Inserir${controllerName}([DataSourceRequest] DataSourceRequest request, ${controllerName}ViewModel viewModel)
+            {
+                ${controllerName}TO to = (${controllerName}TO) viewModel;
+                ValidarModelTO(to);
+
+                if (ModelState.IsValid)
+                {
+                    ValidationResult validation = i${controllerName}AppService.Inserir${controllerName}(to);
+
+                    bool fracassoAoInserir = !validation.IsValid;
+                    if (fracassoAoInserir)
+                    {
+                        validation.ValidationResultToModelState(this.ModelState);
+                    }
+                    else
+                    {
+                        viewModel = (${controllerName}ViewModel) to;
+                    }
+                }
+
+                return Json(new[] { viewModel }.ToDataSourceResult(request, this.ModelState));
+            }
+    `
+
+    return texto;
+}
+
+function gerarValidar(){
+    var controladorName = controlador.value;
+
+    var texto = `
+  
+        private void ValidarModelTO(${controladorName}TO to)
+        {
+            ValidaStringDoViewModel(
+                texto: to.${propName},
+                mensagemEhNulo: App_GlobalResources.${areaName}.${controladorName}.msgCampo${propName}Obrigatorio,
+                tamanhoMaximo: 50,
+                mensagemTamanhoMaximo: App_GlobalResources.${areaName}.${controladorName}.msgCampo${propName}TamanhoMaximo
+             );
+
+            ValidaDecimalMinMax(
+                min: viewModel.PrecoMinimo,
+                max: viewModel.PrecoMaximo,
+                mensagem${propName}rMinMaior: App_GlobalResources.${areaName}.${controladorName}.msg${propName}MinMaior);
+
+            ValidaIntNullableLookUpObrigatorioViewModel(
+                numeroNullAble: viewModel.AreaProdutorCodigo,
+                mensagemObrigatorio: App_GlobalResources.${areaName}.${controladorName}.msg${propName}Obrigatorio
+            );
+
+            ValidaStringNullAble(
+                campoString: viewModel.${propName},
+                mensagemObrigatorio: App_GlobalResources.${areaName}.${controladorName}.msg${propName}Obrigatorio
+            );
+
+        }
+        private void ValidaStringNullAble(string campoString, string mensagemObrigatorio, bool contemValidacaoTamanhoMaximo = false, string mensagemTamanhoInvalido = "", int tamanhoMaximo = 0)
+        {
+            if (string.IsNullOrWhiteSpace(campoString))
+            {
+                this.ModelState.AddModelError(string.Empty, mensagemObrigatorio);
+            }
+
+            if (contemValidacaoTamanhoMaximo)
+            {
+                bool tamanhoInvalido = campoString.Length > tamanhoMaximo;
+
+                if (tamanhoInvalido)
+                {
+                    this.ModelState.AddModelError(string.Empty, mensagemTamanhoInvalido);
+                }
+            }
+        }
+        private void ValidaIntNullableLookUpObrigatorioViewModel(int? numeroNullAble, string mensagemObrigatorio)
+        {
+            if (!numeroNullAble.HasValue)
+            {
+                this.ModelState.AddModelError(string.Empty, mensagemObrigatorio);
+            }
+        }
+        private void ValidaDecimalMinMax(decimal? min, decimal? max, string mensagemValorMinMaior)
+        {
+            bool valoresNaoPreenchidos = !(min.HasValue && max.HasValue);
+            if (valoresNaoPreenchidos)
+            {
+                return;
+            }
+
+            bool valorMinimoMaior = min.Value > max.Value;
+            if (valorMinimoMaior)
+            {
+                this.ModelState.AddModelError(string.Empty, mensagemValorMinMaior);
+            }
+
+        }
+
+        private void ValidaStringDoViewModel(string texto, string mensagemEhNulo, bool contemValidacaoTamanhoMaximo = true, int tamanhoMaximo = 0, string mensagemTamanhoMaximo = "")
+        {
+            if (string.IsNullOrWhiteSpace(texto))
+            {
+                this.ModelState.AddModelError(string.Empty, mensagemEhNulo);
+            }
+            else if (contemValidacaoTamanhoMaximo && texto.Length > tamanhoMaximo)
+            {
+                this.ModelState.AddModelError(string.Empty, mensagemTamanhoMaximo);
+            }
+        }
+
+    `
+}
+   </script>
 </body>
 </html>
