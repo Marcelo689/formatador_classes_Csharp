@@ -15,23 +15,8 @@
         </style>
     </head>
     <body>
-        <div class="container">
-            <label for="classeReduzida">Digite o nome da classe Reduzida :</label>
-            <input width="400px" id="classeReduzida">
-        </div>
-        <div class="container">
-            <label for="controller">Digite o nome do controller :</label>
-            <input width="400px" id="controller">
-        </div>
-        <div class="container">
-            <label for="area">Digite o nome do área :</label>
-            <input width="400px" id="area">
-        </div>
-        <div class="container">
-            <label for="solucao">Digite o nome do solução :</label>
-            <input width="400px" id="solucao">
-        </div>
 
+        <label for="entrada">Cole a classe </label>
         <div class="container">
             <textarea height="50vh" id="entrada"></textarea>
         </div>
@@ -47,13 +32,65 @@
 <script>
 
 var classe = document.getElementById("entrada");
+function Dados(Area,Solution,ControllerName, ClassePrincipal){
+    this.Area = Area;
+    this.Solution = Solution;
+    this.ControllerName = ControllerName;
+    this.ClassePrincipal = ClassePrincipal;
+
+    Dados.prototype.Area = () => Area;
+    Dados.prototype.Solution = () => Solution;
+    Dados.prototype.ControllerName = () => ControllerName;
+    Dados.prototype.ClassePrincipal = () => ClassePrincipal;
+}
+
+function getNamespace(classe){
+
+var dados = new Dados();
+var linhas = classe.split("\n");
+
+for (let indice = 0; indice < linhas.length; indice++) {
+
+    var linha = linhas[indice]; 
+    var haNamespace = linha.indexOf("namespace") != -1;
+
+    var haClassName = linha.indexOf("class") != -1;
+
+    if(haNamespace){
+        var linhaNamespace = linha.trimLeft().split(".");
+
+        var solutionName = linhaNamespace[0].split(" ")[1];
+        var areaName = linhaNamespace[3];
+        var controllerName = linhaNamespace[5];
+
+        dados.Area = areaName;
+        dados.Solution = solutionName;
+        dados.ControllerName = controllerName.replace("{", "");
+
+    }else if(haClassName){
+        var mainClassName = linha.trimLeft().split(" ")[2];
+        dados.ClassePrincipal = mainClassName;
+        return dados;
+    }
+    
+}
+
+return dados;
+}
+
+function normalizaClasseName(nome){
+    return nome.replace("ViewModel", "").replace("TO", "").replace("{","");
+}
 
 function CriarGrid(){
-    var classeCompleta     = entrada.value;     
-    var nomeReduzidoClasse = classeReduzida.value;
-    var controllerName     = controller.value;
-    var nomeSolucao        = solucao.value;
-    var areaName           = area.value; 
+    var classeCompleta     = entrada.value;   
+    
+    var dados = getNamespace(entrada.value);
+    
+    var nomeReduzidoClasse = normalizaClasseName(dados.ClassePrincipal);
+    var controllerName     = dados.ControllerName;
+    var nomeSolucao        = dados.Solution;
+    var areaName           = dados.Area; 
     var numeroPropriedades = 10;
 
     var cabecalho = `
@@ -94,7 +131,7 @@ function CriarGrid(){
     .DataSource(dataSource => dataSource
         .Ajax()
         .PageSize(tamanhoPaginaInicial)
-        .Read(read => read.Action("Read", CONTROLLER_NAME, AREA}))
+        .Read(read => read.Action("Read${nomeReduzidoClasse}", CONTROLLER_NAME, AREA}))
         .Create(create => create.Action("Inserir${nomeReduzidoClasse}", CONTROLLER_NAME, AREA}))
         .Update(update => update.Action("Atualizar${nomeReduzidoClasse}", CONTROLLER_NAME, AREA}))
         .Destroy(destroy => destroy.Action("Remover${nomeReduzidoClasse}", CONTROLLER_NAME, AREA}))
