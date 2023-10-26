@@ -19,18 +19,28 @@
     </style>
 </head>
 <body>
+    <label for="solution">Digite o nome da Solution :</label>
     <div class="container">
-        <label for="controlador">Digite o nome controlador :</label>
+        <input width="400px" id="solution">
+    </div>
+    <label for="area">Digite o nome da Area :</label>
+    <div class="container">
+        <input width="400px" id="area">
+    </div>
+    <label for="controlador">Digite o nome controlador :</label>
+    <div class="container">
         <input width="400px" id="controlador">
     </div>
+    <label for="classe">Nome Classe Principal</label>
     <div class="container">
-        <label for="nomeAnexo">Digite o nome anexo :</label>
-        <input width="400px" id="nomeAnexo">
+        <input width="400px" id="classe">
     </div>
+
+    <label for="entrada">Cole a classe C# aqui</label>
     <div class="container">
         <textarea height="50vh" id="entrada"></textarea>
     </div>
-    <button onclick="gerarRead()">Formatar</button>
+    <button onclick="gerarArquivoController()">Formatar</button>
 
     <label for="saida">Resultado Resx</label>
     <div class="container">
@@ -39,67 +49,211 @@
 
 <script>
 
+function Tipo(tipo, nome){
+        this.decimalNullAble = "decimal?";
+        this.intNullAble = "int?";
+        this.string = "string";
+        this.int = "int";
+        this.bool = "bool";
+
+        Tipo.prototype.decimalNullAble = () => this.decimalNullAble;
+        Tipo.prototype.intNullAble = () => this.intNullAble;
+        Tipo.prototype.string = () => this.string;
+        Tipo.prototype.int = () => this.int;
+        Tipo.prototype.bool = () => this.bool;
+    }
+
+var TiposCSharp = {
+    decimalNullAble : "decimal?",
+    intNullAble : "int?",
+    string : "string",
+    int : "int",
+    bool: "bool",
+}
+
+function Propriedade(tipo, nome){
+    this.tipo = tipo;
+    this.nome = nome;
+
+    Propriedade.prototype.Tipo = () => this.tipo;
+    Propriedade.prototype.Nome = () => this.nome;
+}
+
+function Dados(Area,Solution,ControllerName, ClassePrincipal){
+    this.Area = Area;
+    this.Solution = Solution;
+    this.ControllerName = ControllerName;
+    this.ClassePrincipal = ClassePrincipal;
+
+    Dados.prototype.Area = () => Area;
+    Dados.prototype.Solution = () => Solution;
+    Dados.prototype.ControllerName = () => ControllerName;
+    Dados.prototype.ClassePrincipal = () => ClassePrincipal;
+}
+
+function apenasUnicos(valor, indice, array){
+    return array.indexOf(valor) == indice;
+}
+
+function retornaTiposUnique(lista){
+
+    var listaTipos = [];
+    lista.forEach( item => {
+        var tipo = item[tipo];
+        var naoIncluiTipo = !listaTipos.includes(tipo);
+
+        if(naoIncluiTipo){
+            listaTipos.push(tipo);
+        } 
+    });
+
+    return listaTipos;
+}
+
+function gerarMetodosValidar(listaPropriedades){
+    
+    var tiposContidos = retornaTiposUnique(listaPropriedades);
+    var Tipos = new Tipo();
+    var saida = "";
+
+    if(tiposContidos.includes(Tipos.string)){
+        saida += `
+        private void ValidaStringDoViewModel(string texto, string mensagemEhNulo, bool contemValidacaoTamanhoMaximo = true, int tamanhoMaximo = 0, string mensagemTamanhoMaximo = "")
+        {
+            if (string.IsNullOrWhiteSpace(texto))
+            {
+                this.ModelState.AddModelError(string.Empty, mensagemEhNulo);
+            }
+            else if (contemValidacaoTamanhoMaximo && texto.Length > tamanhoMaximo)
+            {
+                this.ModelState.AddModelError(string.Empty, mensagemTamanhoMaximo);
+            }
+        }
+        `;
+    }
+
+    if(tiposContidos.includes(Tipos.intNullAble)){
+        saida += `
+        private void ValidaIntNullableLookUpObrigatorioViewModel(int? numeroNullAble, string mensagemObrigatorio)
+        {
+            if (!numeroNullAble.HasValue)
+            {
+                this.ModelState.AddModelError(string.Empty, mensagemObrigatorio);
+            }
+        }
+        `;
+    }
+
+    if(tiposContidos.includes(Tipos.decimalNullAble)){
+        saida += `
+        private void ValidaDecimalMinMax(decimal? min, decimal? max, string mensagemValorMinMaior)
+        {
+            bool valoresNaoPreenchidos = !(min.HasValue && max.HasValue);
+            if (valoresNaoPreenchidos)
+            {
+                return;
+            }
+
+            bool valorMinimoMaior = min.Value > max.Value;
+            if (valorMinimoMaior)
+            {
+                this.ModelState.AddModelError(string.Empty, mensagemValorMinMaior);
+            }
+
+        }
+        `;
+    }
+
+    return saida;
+}
+
+function getNamespace(classe){
+
+    var dados = new Dados();
+    var linhas = classe.split("\n");
+
+    for (let indice = 0; indice < linhas.length; indice++) {
+
+        var linha = linhas[indice]; 
+        var haNamespace = linha.indexOf("namespace") != -1;
+
+        var haClassName = linha.indexOf("class") != -1;
+
+        if(haNamespace){
+            var linhaNamespace = linha.trimLeft().split(".");
+
+            var solutionName = linhaNamespace[0].split(" ")[1];
+            var areaName = linhaNamespace[3];
+            var controllerName = linhaNamespace[5];
+
+            dados.Area = areaName;
+            dados.Solution = solutionName;
+            dados.ControllerName = controllerName.replace("{", "");
+
+        }else if(haClassName){
+            var mainClassName = linha.trimLeft().split(" ")[2];
+            dados.ClassePrincipal = mainClassName;
+            return dados;
+        }
+        
+    }
+
+    return dados;
+}
+
 function gerarArquivoController(){
-    var controllerName = controlador.value;
+    var classeName = classe.value;
+    var classeConteudo = entrada.value;
+    var dados = getNamespace(classeConteudo);
+    
+    var areaName = dados.Area;
+    var controllerName = dados.ControllerName;
+    var solutionName = dados.Solution;
+
+    var listaPropriedades = getListProps(classeConteudo);
 
     var textoSaida = "";
 
-    textoSaida += geraNamespace();
-    textoSaida += gerarControlador();
-    textoSaida += gerarRead();
-    textoSaida += gerarInsert();
-    textoSaida += gerarValidar();
+    textoSaida += geraNamespace(solutionName, areaName, controllerName);
+    textoSaida += gerarControlador(controllerName);
+    textoSaida += gerarRead(controllerName, classeName);
+    textoSaida += gerarInsert(controllerName, classeName);
+    textoSaida += gerarMetodosValidar(listaPropriedades);
     textoSaida += fecharArquivo();
+
+    saida.value = textoSaida;
 }
 
 function getListProps(classe){
 
-    function Propriedade(tipo, nome){
-        this.tipo = tipo;
-        this.nome = nome;
-
-        Propriedades.prototype.Tipo = () => this.tipo;
-        Propriedades.prototype.Nome = () => this.nome;
-    }
-
     var listaProps = [];
-
-    var classe = `
-        public class Pessoa{
-            public string Nome {get;set;}
-            public int Idade {get;set;}
-            public bool Vivo {get;set;}
-        } 
-    `;
 
     var linhasClasse = classe.split("\n");
 
     for(var indice =0 ; indice < linhasClasse.length; indice++){
         var linha = linhasClasse[indice];
-
         var linha = linha.trimLeft();
 
         var naoContemPublic = linha.indexOf("public") == -1;
-        if(naoContemPublic){
+        var contemClass = linha.indexOf("class") != -1;
+
+        if(naoContemPublic || contemClass){
             continue;
         }else{
 
             var propType = linha.split(" ")[1];
             var propName = linha.split(" ")[2];
 
-            var itemProp = Propriedade(propType, propName);
+            var itemProp = new Propriedade(propType, propName);
 
-            listaProps.itemProp;
+            listaProps.push(itemProp);
         }
     }
 
     return listaProps;
 }
 
-function geraNamespace(){
-    var controllerName = controlador.value;
-
-    var nomeAppServiceVariable = controllerName[0].toLowerCase() +controllerName;
+function geraNamespace(solutionName, areaName, controllerName){
     var texto = `
     using Universal.Web.Mvc.Extensions;
     using Universal.Web.Telerik.Mvc5.Extensions;
@@ -114,12 +268,10 @@ function geraNamespace(){
     return texto;
 }
 
-function gerarControlador(){  
-    var NomeController = controlador.value;
-    var nomeAnexoAcoes   = nomeAnexo.value; 
+function gerarControlador(NomeController){  
     var arquivoControllador =  
         `\n
-    public class ${NomeController}Controller : Controller {\n
+    public class ${NomeController}Controller : ToisController {\n
 
         public I${NomeController}AppService i${NomeController}AppService { get;}
 
@@ -136,12 +288,10 @@ function gerarControlador(){
     return arquivoControllador;
 }
 
-function gerarRead(){
-
-    var controllerName = controlador.value;
+function gerarRead(controllerName, classeName){
 
     var texto = `
-        public JsonResult Read${controllerName}([DataSourceRequest] DataSourceRequest request, ${controllerName}FilterViewModel filtrosViewModel)
+        public JsonResult Read${classeName}([DataSourceRequest] DataSourceRequest request, ${controllerName}FilterViewModel filtrosViewModel)
         {
             ${controllerName}FilterViewModelTO filtrosTO = (${controllerName}FilterViewModelTO) filtrosViewModel;
 
@@ -175,11 +325,9 @@ function gerarRead(){
     return texto;
 }
     
-function gerarInsert(){
-    var controllerName = controlador.value;
-
+function gerarInsert(controllerName, classeName){
     var texto = `
-        public JsonResult Inserir${controllerName}([DataSourceRequest] DataSourceRequest request, ${controllerName}ViewModel viewModel)
+        public JsonResult Inserir${classeName}([DataSourceRequest] DataSourceRequest request, ${controllerName}ViewModel viewModel)
             {
                 ${controllerName}TO to = (${controllerName}TO) viewModel;
                 ValidarModelTO(to);
@@ -206,11 +354,9 @@ function gerarInsert(){
     return texto;
 }
 
-function gerarValidar(classe){
+function gerarValidar(classe, controladorName, areaName){
 
     var listaClassePropsTipoName = getListProps(classe);
-
-    var controladorName = controlador.value;
 
     var texto = `
   
@@ -256,40 +402,10 @@ function gerarValidar(classe){
                 }
             }
         }
-        private void ValidaIntNullableLookUpObrigatorioViewModel(int? numeroNullAble, string mensagemObrigatorio)
-        {
-            if (!numeroNullAble.HasValue)
-            {
-                this.ModelState.AddModelError(string.Empty, mensagemObrigatorio);
-            }
-        }
-        private void ValidaDecimalMinMax(decimal? min, decimal? max, string mensagemValorMinMaior)
-        {
-            bool valoresNaoPreenchidos = !(min.HasValue && max.HasValue);
-            if (valoresNaoPreenchidos)
-            {
-                return;
-            }
+       
+       
 
-            bool valorMinimoMaior = min.Value > max.Value;
-            if (valorMinimoMaior)
-            {
-                this.ModelState.AddModelError(string.Empty, mensagemValorMinMaior);
-            }
-
-        }
-
-        private void ValidaStringDoViewModel(string texto, string mensagemEhNulo, bool contemValidacaoTamanhoMaximo = true, int tamanhoMaximo = 0, string mensagemTamanhoMaximo = "")
-        {
-            if (string.IsNullOrWhiteSpace(texto))
-            {
-                this.ModelState.AddModelError(string.Empty, mensagemEhNulo);
-            }
-            else if (contemValidacaoTamanhoMaximo && texto.Length > tamanhoMaximo)
-            {
-                this.ModelState.AddModelError(string.Empty, mensagemTamanhoMaximo);
-            }
-        }
+        
     `
 }
    

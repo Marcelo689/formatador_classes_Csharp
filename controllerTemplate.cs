@@ -16,7 +16,7 @@ using Universal.Web.Telerik.Mvc5.Extensions;
 namespace Universal.Tois.RecebimentoTabaco.Web.Areas.Cadastros.Controllers
 {
     #if !DEBUG
-            [Authorize( Roles = "CadastrarPoliticaNegociacaoCompra" )]
+        [Authorize( Roles = "CadastrarPoliticaNegociacaoCompra" )]
     #endif
     public class CadastrarPoliticaNegociacaoCompraController : ToisController
     {
