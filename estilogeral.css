@@ -1,0 +1,98 @@
+textarea{
+    background-color: black;
+    color: rgb(67, 204, 124);
+}
+
+.container{
+    display:flex;
+    justify-content: center;
+}
+
+textarea{
+    height: 45vh;
+    margin: auto;
+    display: block;
+    padding: 20px;
+    transition: 0.2s;
+    border: 2px solid wheat;
+    border-radius: 10px;
+    outline: none;
+    width: 80vw;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: medium;
+    font-weight: 900;
+}
+
+label{
+    display: block;
+    color: rgb(229, 241, 112);
+    font-size: 2rem;
+    margin: 30px;
+    margin-left: 10vw ;
+    font-weight: 800;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+body{
+    background-color: blueviolet;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+h1{
+    color: rgb(3, 201, 3);
+    font-size: 2.4rem;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    text-align: center;
+}
+
+button{
+    background-color: green;
+    color: white;
+    margin: 20px;
+    width: 200px;
+    font-weight: 800;
+    border-radius: 10px;
+    transition: 0.8s;
+    padding: 10px;
+    cursor: pointer;
+    border: none;
+    box-shadow: rgba(0,0,0, 0.24) 0px 3px 8px;
+}
+
+.container-btn{
+    display: flex;
+    justify-content: center;
+}
+
+.container-mensagem{
+    background: rgba(255, 255, 255, 0.4) ;
+    color: rgba(200,200,255, 0.9);
+    position: absolute;
+    z-index: 20;
+    margin: auto;
+    margin-top:-50vh;
+    margin-left: 40vw;
+    text-align: center;
+    padding: 40px;
+    border-radius: 20px;
+    transition: 0.7s;
+    font-size: 2rem;
+    animation: fadeIn 0.7s;
+}
+
+@keyframes fadeIn{
+    0%{ opacity:0}
+    100%{ opacity : 1}
+}
+
+button:hover{
+    color: rgb(15, 15, 15);
+    background-color: aquamarine;
+    box-shadow: black 2px 3px 4px 5px;
+}
+
+#saida{
+    color: rgb(45, 207, 207);
+}

@@ -1,28 +1,22 @@
 <html>
     <head>
-        <style>
-            .container{
-                display:flex;
-            }
-            textarea{
-                height: 45vh;
-                display: block;
-                width: 80vw;
-            }
-            label{
-                display: block;
-            }
-        </style>
+        
+    <link rel="stylesheet" href="estilogeral.css">
     </head>
     <body>
+        <h1>Gerar apenas colunas da Grid Kendo</h1>
+        <label for="entrada">Cole a classe com namespace (de preferencia TO)C#</label>
         <div class="container">
-            <textarea height="50vh" id="entrada"></textarea>
+            <textarea height="50vh" spellcheck="false" id="entrada"></textarea>
         </div>
-        <button onclick="RetornaColunasGrid()">Formatar</button>
+        
+        <div class="container-btn">
+            <button onclick="RetornaColunasGrid()">Formatar</button>
+        </div>
 
         <label for="saida">Resultado Resx</label>
         <div class="container">
-            <textarea height="50vh" id="saida"></textarea>
+            <textarea height="50vh" spellcheck="false" id="saida"></textarea>
         </div>
     </body>
 </html>

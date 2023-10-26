@@ -4,30 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerar Controller</title>
-    <style>
-        .container{
-            display:flex;
-        }
-        textarea{
-            height: 45vh;
-            display: block;
-            width: 80vw;
-        }
-        label{
-            display: block;
-        }
-    </style>
+    <link rel="stylesheet" href="estilogeral.css">
 </head>
 <body>
-    <label for="entrada">Cole a classe C# aqui</label>
+    <h1>Gerar controller ASP.NET MVC Kendo</h1>
+    <label for="entrada">Cole a classe com namespace (de preferencia TO)C#</label>
     <div class="container">
-        <textarea height="50vh" id="entrada"></textarea>
+        <textarea height="50vh" spellcheck="false" id="entrada"></textarea>
     </div>
-    <button onclick="gerarArquivoController()">Formatar</button>
+    
+    <div class="container-btn">
+        <button onclick="gerarArquivoController()">Formatar</button>
+    </div>
 
     <label for="saida">Resultado Resx</label>
     <div class="container">
-        <textarea height="50vh" id="saida"></textarea>
+        <textarea height="50vh" spellcheck="false" id="saida"></textarea>
     </div>
 
 <script>
