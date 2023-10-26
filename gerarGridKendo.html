@@ -21,6 +21,7 @@
     </body>
 </html>
 
+<script src="main.js"></script>
 <script>
 
 var classe = document.getElementById("entrada");
@@ -130,6 +131,8 @@ function CriarGrid(){
     )`
 
     saida.innerHTML = grid;
+    
+    copiaAposFormatado();
 }
 
 function geraColunaGrid(nomePropriedade, tipoPropriedade, largura = "percentualLargura"){

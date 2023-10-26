@@ -1,9 +1,8 @@
 function copiaAposFormatado(){
     saida.select();
-    //saida.setSelectionrange(0, 99999);
     document.execCommand('copy');
-    saida.focus();
     exibeMensagemCentralizada();
+    document.getSelection().empty();
 }
 
 function exibeMensagemCentralizada(){

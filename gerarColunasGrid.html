@@ -21,6 +21,7 @@
     </body>
 </html>
 
+<script src="main.js"></script>
 <script>
 
 var classe = document.getElementById("entrada");
@@ -91,6 +92,7 @@ function RetornaColunasGrid(){
     if(entradaContemValor){
         var saida = document.getElementById("saida");
         saida.innerHTML = RetornaColumns(entradaString);
+        copiaAposFormatado();
     }
 }
 
