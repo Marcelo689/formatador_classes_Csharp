@@ -19,23 +19,6 @@
     </style>
 </head>
 <body>
-    <label for="solution">Digite o nome da Solution :</label>
-    <div class="container">
-        <input width="400px" id="solution">
-    </div>
-    <label for="area">Digite o nome da Area :</label>
-    <div class="container">
-        <input width="400px" id="area">
-    </div>
-    <label for="controlador">Digite o nome controlador :</label>
-    <div class="container">
-        <input width="400px" id="controlador">
-    </div>
-    <label for="classe">Nome Classe Principal</label>
-    <div class="container">
-        <input width="400px" id="classe">
-    </div>
-
     <label for="entrada">Cole a classe C# aqui</label>
     <div class="container">
         <textarea height="50vh" id="entrada"></textarea>
@@ -202,14 +185,14 @@ function getNamespace(classe){
 }
 
 function gerarArquivoController(){
-    var classeName = classe.value;
     var classeConteudo = entrada.value;
     var dados = getNamespace(classeConteudo);
     
     var areaName = dados.Area;
     var controllerName = dados.ControllerName;
     var solutionName = dados.Solution;
-
+    var classeName = dados.ClassePrincipal.replace("TO","");
+    
     var listaPropriedades = getListProps(classeConteudo);
 
     var textoSaida = "";
