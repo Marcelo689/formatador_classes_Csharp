@@ -1,41 +1,49 @@
-namespace Universal.Tois.RecebimentoTabaco.Web.Areas.Cadastros.Controllers
-{   
+
+using Universal.Web.Mvc.Extensions;
+using Universal.Web.Telerik.Mvc5.Extensions;
+
+namespace Universal.Tois.Fabrica.Web.Areas.Operacoes.Controllers
+{
     #if !DEBUG
-        [Authorize( Roles = "CadastrarPoliticaNegociacaoCompra" )]
+        [Authorize( Roles = "CadastrarTemplate" )]
     #endif
-    public class AgendarCompra : ToisController
-    {
+    
 
-        public MinhaClasseController()
+    public class CadastrarTemplateController : ToisController {
+
+
+        public ICadastrarTemplateAppService iCadastrarTemplateAppService { get;}
+
+        public CadastrarTemplateController(ICadastrarTemplateAppService iCadastrarTemplateAppService)
         {
-
+            iCadastrarTemplateAppService = iCadastrarTemplateAppService;
         }
 
-        public ActionResult Index()
-        {
+        public ActionResult Index(){
             return View();
         }
-        public JsonResult ReadAgendarCompra([DataSourceRequest] DataSourceRequest request, AgendarCompraFilterViewModel filtrosViewModel)
+    
+        public JsonResult ReadTemplate([DataSourceRequest] DataSourceRequest request, CadastrarTemplateFilterViewModel filtrosViewModel)
         {
-            AgendarCompraFilterViewModelTO filtrosTO = (AgendarCompraFilterViewModelTO)filtrosViewModel;
+            CadastrarTemplateFilterViewModelTO filtrosTO = (CadastrarTemplateFilterViewModelTO) filtrosViewModel;
 
             filtrosTO.PagingParameterTO = new PagingParameterTO(request.Page, request.PageSize);
 
             TratarModelo(filtrosTO);
 
-            ValidationResult<PagingResult<AgendarCompraViewModel>> validationResultViewModel = new ValidationResult<PagingResult<AgendarCompraViewModel>>();
-            validationResultViewModel.Result = new PagingResult<AgendarCompraViewModel>();
-            ValidationResult<PagingResult<AgendarCompraTO>> validationPagingAgendarCompraTO = iAgendarCompraAppService.GetListaAgendarCompra(filtrosTO);
-            IEnumerable<AgendarCompraTO> listaAgendarCompraTO = validationPagingAgendarCompraTO.Result.DataSource;
+            ValidationResult<PagingResult<CadastrarTemplateViewModel>> validationResultViewModel = new ValidationResult<PagingResult<CadastrarTemplateViewModel>>();
+            validationResultViewModel.Result = new PagingResult<CadastrarTemplateViewModel>();
+            ValidationResult<PagingResult<CadastrarTemplateTO>> validationPagingCadastrarTemplateTO = iCadastrarTemplateAppService.GetListaCadastrarTemplate(filtrosTO);
+            IEnumerable<CadastrarTemplateTO> listaCadastrarTemplateTO = validationPagingCadastrarTemplateTO.Result.DataSource;
 
-            bool sucessoAoBuscarDados = validationPagingAgendarCompraTO.IsValid;
+            bool sucessoAoBuscarDados = validationPagingCadastrarTemplateTO.IsValid;
             if (sucessoAoBuscarDados)
             {
                 bool listaPreenchida = listaNegociacaoTO != null;
                 if (listaPreenchida)
                 {
-                    validationResultViewModel.Result.DataSource = listaAgendarCompraTO.Select(to => (AgendarCompraViewModel)to).ToList();
-                    validationResultViewModel.Result.Total = validationPagingPoliticaAgendarCompraTO.Result.Total;
+                    validationResultViewModel.Result.DataSource = listaCadastrarTemplateTO.Select(to => (CadastrarTemplateViewModel) to).ToList();
+                    validationResultViewModel.Result.Total = validationPagingPoliticaCadastrarTemplateTO.Result.Total;
                 }
                 else
                 {
@@ -45,15 +53,14 @@ namespace Universal.Tois.RecebimentoTabaco.Web.Areas.Cadastros.Controllers
 
             return Json(validationResultViewModel.ToDataSourceResult(request, ModelState), JsonRequestBehavior.AllowGet);
         }
-
-        public JsonResult InserirPolitica([DataSourceRequest] DataSourceRequest request, PoliticaNegociacaoCompraViewModel viewModel)
+        public JsonResult InserirTemplate([DataSourceRequest] DataSourceRequest request, CadastrarTemplateViewModel viewModel)
         {
-            CadastrarPoliticaNegociacaoCompraTO to = (CadastrarPoliticaNegociacaoCompraTO) viewModel;
+            CadastrarTemplateTO to = (CadastrarTemplateTO) viewModel;
             ValidarModelTO(to);
 
             if (ModelState.IsValid)
             {
-                ValidationResult validation = iCadastrarPoliticaNegociacaoCompraAppService.InserirPolitica(to);
+                ValidationResult validation = iCadastrarTemplateAppService.InserirCadastrarTemplate(to);
 
                 bool fracassoAoInserir = !validation.IsValid;
                 if (fracassoAoInserir)
@@ -62,11 +69,51 @@ namespace Universal.Tois.RecebimentoTabaco.Web.Areas.Cadastros.Controllers
                 }
                 else
                 {
-                    viewModel = (PoliticaNegociacaoCompraViewModel) to;
+                    viewModel = (CadastrarTemplateViewModel) to;
                 }
             }
 
             return Json(new[] { viewModel }.ToDataSourceResult(request, this.ModelState));
         }
-    }
+    
+        
+      private void ValidaStringDoViewModel(string texto, string mensagemEhNulo, bool contemValidacaoTamanhoMaximo = true, int tamanhoMaximo = 0, string mensagemTamanhoMaximo = "")
+        {
+            if (string.IsNullOrWhiteSpace(texto))
+            {
+                this.ModelState.AddModelError(string.Empty, mensagemEhNulo);
+            }
+            else if (contemValidacaoTamanhoMaximo && texto.Length > tamanhoMaximo)
+            {
+                this.ModelState.AddModelError(string.Empty, mensagemTamanhoMaximo);
+            }
+        }
+
+        private void ValidarModel(TemplateViewModel viewmodel){
+
+
+            ValidaStringDoViewModel(
+                texto: viewmodel.Nome,
+                mensagemEhNulo: App_GlobalResources.Operacoes.CadastrarTemplate.msgCampoNomeObrigatorio,
+                tamanhoMaximo: 50,
+                mensagemTamanhoMaximo: App_GlobalResources.Operacoes.CadastrarTemplate.msgCampoNomeTamanhoMaximo
+            );
+
+
+            ValidaStringDoViewModel(
+                texto: viewmodel.Senha,
+                mensagemEhNulo: App_GlobalResources.Operacoes.CadastrarTemplate.msgCampoSenhaObrigatorio,
+                tamanhoMaximo: 50,
+                mensagemTamanhoMaximo: App_GlobalResources.Operacoes.CadastrarTemplate.msgCampoSenhaTamanhoMaximo
+            );
+
+
+            ValidaStringDoViewModel(
+                texto: viewmodel.Email,
+                mensagemEhNulo: App_GlobalResources.Operacoes.CadastrarTemplate.msgCampoEmailObrigatorio,
+                tamanhoMaximo: 50,
+                mensagemTamanhoMaximo: App_GlobalResources.Operacoes.CadastrarTemplate.msgCampoEmailTamanhoMaximo
+            );
+      }
+}
 }

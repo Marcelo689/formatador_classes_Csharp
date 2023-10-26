@@ -9,7 +9,7 @@ namespace Universal.Tois.Fabrica.Web.Areas.Operacoes.Controllers
 #endif
 
 
-    public class CadastrarTemplateController : Controller
+    public class CadastrarTemplateController : ToisController
     {
 
 
@@ -25,7 +25,7 @@ namespace Universal.Tois.Fabrica.Web.Areas.Operacoes.Controllers
             return View();
         }
 
-        public JsonResult Read([DataSourceRequest] DataSourceRequest request, CadastrarTemplateFilterViewModel filtrosViewModel)
+        public JsonResult ReadTemplate([DataSourceRequest] DataSourceRequest request, CadastrarTemplateFilterViewModel filtrosViewModel)
         {
             CadastrarTemplateFilterViewModelTO filtrosTO = (CadastrarTemplateFilterViewModelTO)filtrosViewModel;
 
@@ -55,7 +55,7 @@ namespace Universal.Tois.Fabrica.Web.Areas.Operacoes.Controllers
 
             return Json(validationResultViewModel.ToDataSourceResult(request, ModelState), JsonRequestBehavior.AllowGet);
         }
-        public JsonResult Inserir([DataSourceRequest] DataSourceRequest request, CadastrarTemplateViewModel viewModel)
+        public JsonResult InserirTemplate([DataSourceRequest] DataSourceRequest request, CadastrarTemplateViewModel viewModel)
         {
             CadastrarTemplateTO to = (CadastrarTemplateTO)viewModel;
             ValidarModelTO(to);
@@ -77,5 +77,19 @@ namespace Universal.Tois.Fabrica.Web.Areas.Operacoes.Controllers
 
             return Json(new[] { viewModel }.ToDataSourceResult(request, this.ModelState));
         }
+
+
+        private void ValidaStringDoViewModel(string texto, string mensagemEhNulo, bool contemValidacaoTamanhoMaximo = true, int tamanhoMaximo = 0, string mensagemTamanhoMaximo = "")
+        {
+            if (string.IsNullOrWhiteSpace(texto))
+            {
+                this.ModelState.AddModelError(string.Empty, mensagemEhNulo);
+            }
+            else if (contemValidacaoTamanhoMaximo && texto.Length > tamanhoMaximo)
+            {
+                this.ModelState.AddModelError(string.Empty, mensagemTamanhoMaximo);
+            }
+        }
+
     }
 }
