@@ -1,49 +1,75 @@
 <html>
     <head>
-        <style>
-            .container{
-                display:flex;
-            }
-            textarea{
-                height: 45vh;
-                display: block;
-                width: 80vw;
-            }
-            label{
-                display: block;
-            }
-        </style>
+      
+    <link rel="stylesheet" href="estilogeral.css">
     </head>
     <body>
-        <label for="controller">Digite o nome do controller :</label>
+        <h1>Gerar DataNotations</h1>
+        <label for="entrada">Cole a classe com namespace (de preferencia TO)C#</label>
         <div class="container">
-        <input width="400px" id="controller">
+            <textarea height="50vh" spellcheck="false" id="entrada"></textarea>
         </div>
-        <label for="solution">Digite o nome da Solution :</label>
-        <div class="container">
-        <input width="400px" id="solution">
+        
+        <div class="container-btn">
+            <button onclick="RetornaDataAnotations()">Formatar</button>
         </div>
-        <label for="area">Digite o nome da Area :</label>
-        <div class="container">
-        <input width="400px" id="area">
-        </div>
-        <label for="entrada">Digite a classe C#</label>
-        <div class="container">
-            <textarea height="50vh" id="entrada"></textarea>
-        </div>
-        <button onclick="RetornaDataAnotations()">Formatar</button>
 
         <label for="saida">Resultado Resx</label>
         <div class="container">
-            <textarea height="50vh" id="saida"></textarea>
+            <textarea height="50vh" spellcheck="false" id="saida"></textarea>
         </div>
     </body>
 </html>
 
+<script src="main.js"></script>
 <script>
 
-var classe = document.getElementById("entrada");
+function Dados(Area,Solution,ControllerName, ClassePrincipal){
+    this.Area = Area;
+    this.Solution = Solution;
+    this.ControllerName = ControllerName;
+    this.ClassePrincipal = ClassePrincipal;
 
+    Dados.prototype.Area = () => Area;
+    Dados.prototype.Solution = () => Solution;
+    Dados.prototype.ControllerName = () => ControllerName;
+    Dados.prototype.ClassePrincipal = () => ClassePrincipal;
+}
+function getNamespace(classe){
+
+var dados = new Dados();
+var linhas = classe.split("\n");
+
+for (let indice = 0; indice < linhas.length; indice++) {
+
+    var linha = linhas[indice]; 
+    var haNamespace = linha.indexOf("namespace") != -1;
+
+    var haClassName = linha.indexOf("class") != -1;
+
+    if(haNamespace){
+        var linhaNamespace = linha.trimLeft().split(".");
+
+        var solutionName = linhaNamespace[0].split(" ")[1];
+        var areaName = linhaNamespace[3];
+        var controllerName = linhaNamespace[5];
+
+        dados.Area = areaName;
+        dados.Solution = solutionName;
+        dados.ControllerName = controllerName.replace("{", "");
+
+    }else if(haClassName){
+        var mainClassName = linha.trimLeft().split(" ")[2];
+        dados.ClassePrincipal = mainClassName;
+        return dados;
+    }
+    
+}
+
+return dados;
+}
+
+var classe = document.getElementById("entrada");
 
 function retornaCaminhoDataType(tipoVariavel){
     const caminhoTemplate = "Kendo\\";
@@ -112,12 +138,15 @@ function encontraIndiceUltimoCaractere(textoClasse){
 }
 
 function retornaPropriedadeComDataAnotation(classe){
+
+    var dados = getNamespace(classe);
     var saida = "";
-    var nomeSolucao = solution.value;
-    var nomeArea = area.value;
-    var nomeController = controller.value;
+    var nomeSolucao = dados.Solution;
+    var nomeArea = dados.Area;
+    var nomeController = dados.ControllerName;
     var listaPropriedades = [];
-    var nomeClasse = nomeController;
+
+    var nomeClasse = dados.ClassePrincipal;
     var explicitOperador = "public static explicit operator";
 
     var indiceUltimo = encontraIndiceUltimoCaractere(classe);
@@ -159,8 +188,8 @@ function retornaPropriedadeComDataAnotation(classe){
             
             if(contemClass){
                 nomeClasse = linha.trimLeft().split(" ")[2].replace("{","");
-
-                saida += "\n" + linha  + "\n";
+                nomeClasse = nomeClasse.replace("TO","ViewModel");
+                saida += "\n" + linha.replace("TO","ViewModel") + "\n";
                 continue;
             }
 
@@ -175,7 +204,7 @@ function retornaPropriedadeComDataAnotation(classe){
             linha += "\n";
         }
 
-        if(index == linhas.length -1){
+        if(index == linhas.length -2){
             saida += gerarExplictCast(nomeClasse, listaPropriedades);
         }
         saida += linha;
@@ -183,6 +212,7 @@ function retornaPropriedadeComDataAnotation(classe){
     
     return saida;
 }
+
 function gerarExplictCast(nomeClasse, listaPropriedades){
     var explicitoCast =  `\n        public static explicit operator ${nomeClasse}(${nomeClasse.replace("ViewModel","")}TO to)
         {
@@ -201,28 +231,14 @@ function gerarExplictCast(nomeClasse, listaPropriedades){
 
 function RetornaDataAnotations(){
     var entradaString = entrada.value;
-    var controlador = controller.value;
 
     const entradaContemValor =  entradaString != undefined;
 
     if(entradaContemValor){
         var saida = document.getElementById("saida");
         saida.innerHTML = retornaPropriedadeComDataAnotation(entradaString);
+        copiaAposFormatado();
     }
 }
 
-var texto1correto = `public class Pessoa{
-
-public string Nome {get;set;}
-public int Idade {get;set;}
-public bool Vivo {get;set;}
-}
-`
-var textoincorreto = `public class Pessoa{
-
-public string Nome {get;set;}
-public int Idade {get;set;}
-public bool Vivo {get;set;}
-} 
-`;
 </script>

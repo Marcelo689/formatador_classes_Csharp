@@ -4,30 +4,28 @@ using Universal.Web.Telerik.Mvc5.Extensions;
 
 namespace Universal.Tois.Fabrica.Web.Areas.Operacoes.Controllers
 {
-#if !DEBUG
-    [Authorize(Roles = "CadastrarTemplate")]
-#endif
+    #if !DEBUG
+        [Authorize( Roles = "CadastrarTemplate" )]
+    #endif
+    
+
+    public class CadastrarTemplateController : ToisController {
 
 
-    public class CadastrarTemplateController : ToisController
-    {
-
-
-        public ICadastrarTemplateAppService iCadastrarTemplateAppService { get; }
+        public ICadastrarTemplateAppService iCadastrarTemplateAppService { get;}
 
         public CadastrarTemplateController(ICadastrarTemplateAppService iCadastrarTemplateAppService)
         {
             iCadastrarTemplateAppService = iCadastrarTemplateAppService;
         }
 
-        public ActionResult Index()
-        {
+        public ActionResult Index(){
             return View();
         }
-
+    
         public JsonResult ReadTemplate([DataSourceRequest] DataSourceRequest request, CadastrarTemplateFilterViewModel filtrosViewModel)
         {
-            CadastrarTemplateFilterViewModelTO filtrosTO = (CadastrarTemplateFilterViewModelTO)filtrosViewModel;
+            CadastrarTemplateFilterViewModelTO filtrosTO = (CadastrarTemplateFilterViewModelTO) filtrosViewModel;
 
             filtrosTO.PagingParameterTO = new PagingParameterTO(request.Page, request.PageSize);
 
@@ -44,7 +42,7 @@ namespace Universal.Tois.Fabrica.Web.Areas.Operacoes.Controllers
                 bool listaPreenchida = listaNegociacaoTO != null;
                 if (listaPreenchida)
                 {
-                    validationResultViewModel.Result.DataSource = listaCadastrarTemplateTO.Select(to => (CadastrarTemplateViewModel)to).ToList();
+                    validationResultViewModel.Result.DataSource = listaCadastrarTemplateTO.Select(to => (CadastrarTemplateViewModel) to).ToList();
                     validationResultViewModel.Result.Total = validationPagingPoliticaCadastrarTemplateTO.Result.Total;
                 }
                 else
@@ -57,7 +55,7 @@ namespace Universal.Tois.Fabrica.Web.Areas.Operacoes.Controllers
         }
         public JsonResult InserirTemplate([DataSourceRequest] DataSourceRequest request, CadastrarTemplateViewModel viewModel)
         {
-            CadastrarTemplateTO to = (CadastrarTemplateTO)viewModel;
+            CadastrarTemplateTO to = (CadastrarTemplateTO) viewModel;
             ValidarModelTO(to);
 
             if (ModelState.IsValid)
@@ -71,15 +69,15 @@ namespace Universal.Tois.Fabrica.Web.Areas.Operacoes.Controllers
                 }
                 else
                 {
-                    viewModel = (CadastrarTemplateViewModel)to;
+                    viewModel = (CadastrarTemplateViewModel) to;
                 }
             }
 
             return Json(new[] { viewModel }.ToDataSourceResult(request, this.ModelState));
         }
-
-
-        private void ValidaStringDoViewModel(string texto, string mensagemEhNulo, bool contemValidacaoTamanhoMaximo = true, int tamanhoMaximo = 0, string mensagemTamanhoMaximo = "")
+    
+        
+      private void ValidaStringDoViewModel(string texto, string mensagemEhNulo, bool contemValidacaoTamanhoMaximo = true, int tamanhoMaximo = 0, string mensagemTamanhoMaximo = "")
         {
             if (string.IsNullOrWhiteSpace(texto))
             {
@@ -91,5 +89,31 @@ namespace Universal.Tois.Fabrica.Web.Areas.Operacoes.Controllers
             }
         }
 
-    }
+        private void ValidarModel(TemplateViewModel viewmodel){
+
+
+            ValidaStringDoViewModel(
+                texto: viewmodel.Nome,
+                mensagemEhNulo: App_GlobalResources.Operacoes.CadastrarTemplate.msgCampoNomeObrigatorio,
+                tamanhoMaximo: 50,
+                mensagemTamanhoMaximo: App_GlobalResources.Operacoes.CadastrarTemplate.msgCampoNomeTamanhoMaximo
+            );
+
+
+            ValidaStringDoViewModel(
+                texto: viewmodel.Senha,
+                mensagemEhNulo: App_GlobalResources.Operacoes.CadastrarTemplate.msgCampoSenhaObrigatorio,
+                tamanhoMaximo: 50,
+                mensagemTamanhoMaximo: App_GlobalResources.Operacoes.CadastrarTemplate.msgCampoSenhaTamanhoMaximo
+            );
+
+
+            ValidaStringDoViewModel(
+                texto: viewmodel.Email,
+                mensagemEhNulo: App_GlobalResources.Operacoes.CadastrarTemplate.msgCampoEmailObrigatorio,
+                tamanhoMaximo: 50,
+                mensagemTamanhoMaximo: App_GlobalResources.Operacoes.CadastrarTemplate.msgCampoEmailTamanhoMaximo
+            );
+      }
+}
 }
