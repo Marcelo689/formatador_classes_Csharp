@@ -1,4 +1,4 @@
-namespace assets{
+namespace Fabrica.Web.Areas.Operacoes.Models.CadastrarTemplate{
     public class Template{
         public int Id {get;set;}
         public string Nome {get;set;}
