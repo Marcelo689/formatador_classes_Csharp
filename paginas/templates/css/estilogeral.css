@@ -27,7 +27,6 @@ label{
     display: block;
     color: rgb(229, 241, 112);
     font-size: 2rem;
-    margin: 30px;
     margin-left: 10vw ;
     font-weight: 800;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
@@ -95,4 +94,9 @@ button:hover{
 
 #saida{
     color: rgb(45, 207, 207);
+}
+
+input{
+    height: 30px;
+    margin-left: 10px;
 }

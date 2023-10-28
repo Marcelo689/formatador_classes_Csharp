@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formatadores</title>
+    <link rel="stylesheet" href="css/index.css"> 
+    <link rel="stylesheet" href="templates/css/estilogeral.css">
+    <script src="templates/js/main.js"></script>
+    <script src="templates/js/controller.js"></script>
+    <script src="templates/js/grid.js"></script>
+    <script src="templates/js/labelViewModel.js"></script>
+    <script src="templates/js/resx.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <select name="tela" id="tela">
+            <option value="templates/FormataResx.html">Criar Resx Labels</option>
+            <option value="templates/gerarLabelResx.html">Criar Label ViewModel</option>
+            <option value="templates/gerarControllerKendo.html">Criar Controller</option>
+            <option value="templates/gerarGridKendo.html">Criar Grid</option>
+        </select>
+        <button onclick="Carregar()">
+            Carregar
+        </button>
+
+        <div class="container main-div">
+            <label for="area">Controller</label>
+            <input type="text" id="controller">
+            <label for="area">Area</label>
+            <input type="text" id="area">
+            <label for="classe">Classe</label>
+            <input type="text" id="classe">
+        </div>
+
+    </div>
+    <div id="screenGrid">
+    </div>
+    <script src="js/index.js"></script>
+</body>
+</html>

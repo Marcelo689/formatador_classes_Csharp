@@ -1,0 +1,12 @@
+select{
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    background-color: black;
+    color: white;
+    font-weight: bolder;
+}
+
+.main-div{
+    width: 90vw;
+}

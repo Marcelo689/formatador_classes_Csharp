@@ -1,8 +1,3 @@
-<html>
-    <head>
-      
-    <link rel="stylesheet" href="estilogeral.css">
-    </head>
     <body>
         <h1>Gerar Grid ASP.NET KENDO</h1>
         <label for="entrada">Cole a classe com namespace (de preferencia TO)C#</label>
@@ -19,57 +14,10 @@
             <textarea height="50vh" spellcheck="false" id="saida"></textarea>
         </div>
     </body>
-</html>
 
-<script src="main.js"></script>
 <script>
 
 var classe = document.getElementById("entrada");
-function Dados(Area,Solution,ControllerName, ClassePrincipal){
-    this.Area = Area;
-    this.Solution = Solution;
-    this.ControllerName = ControllerName;
-    this.ClassePrincipal = ClassePrincipal;
-
-    Dados.prototype.Area = () => Area;
-    Dados.prototype.Solution = () => Solution;
-    Dados.prototype.ControllerName = () => ControllerName;
-    Dados.prototype.ClassePrincipal = () => ClassePrincipal;
-}
-
-function getNamespace(classe){
-
-var dados = new Dados();
-var linhas = classe.split("\n");
-
-for (let indice = 0; indice < linhas.length; indice++) {
-
-    var linha = linhas[indice]; 
-    var haNamespace = linha.indexOf("namespace") != -1;
-
-    var haClassName = linha.indexOf("class") != -1;
-
-    if(haNamespace){
-        var linhaNamespace = linha.trimLeft().split(".");
-
-        var solutionName = linhaNamespace[0].split(" ")[1];
-        var areaName = linhaNamespace[3];
-        var controllerName = linhaNamespace[5];
-
-        dados.Area = areaName;
-        dados.Solution = solutionName;
-        dados.ControllerName = controllerName.replace("{", "");
-
-    }else if(haClassName){
-        var mainClassName = linha.trimLeft().split(" ")[2];
-        dados.ClassePrincipal = mainClassName;
-        return dados;
-    }
-    
-}
-
-return dados;
-}
 
 function normalizaClasseName(nome){
     return nome.replace("ViewModel", "").replace("TO", "").replace("{","");
