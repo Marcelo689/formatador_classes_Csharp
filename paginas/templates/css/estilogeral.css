@@ -99,4 +99,11 @@ button:hover{
 input{
     height: 30px;
     margin-left: 10px;
+    border-radius: 10px;
+    border: none;
+    background-color: black;
+    color: white;
+    font-size: 12px;
+    font-weight: bolder;
+    text-align: center;
 }

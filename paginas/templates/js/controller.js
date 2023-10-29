@@ -124,40 +124,6 @@ function gerarValidacaoModel(listaPropriedades, nomeClassePrincipal, areaName, c
     return saida;
 }
 
-function getNamespace(classe){
-
-    var dados = new Dados();
-    var linhas = classe.split("\n");
-
-    for (let indice = 0; indice < linhas.length; indice++) {
-
-        var linha = linhas[indice]; 
-        var haNamespace = linha.indexOf("namespace") != -1;
-
-        var haClassName = linha.indexOf("class") != -1;
-
-        if(haNamespace){
-            var linhaNamespace = linha.trimLeft().split(".");
-
-            var solutionName = linhaNamespace[0].split(" ")[1];
-            var areaName = linhaNamespace[3];
-            var controllerName = linhaNamespace[5];
-
-            dados.Area = areaName;
-            dados.Solution = solutionName;
-            dados.ControllerName = controllerName.replace("{", "");
-
-        }else if(haClassName){
-            var mainClassName = linha.trimLeft().split(" ")[2];
-            dados.ClassePrincipal = mainClassName;
-            return dados;
-        }
-        
-    }
-
-    return dados;
-}
-
 function normalizaClasseName(nome){
     return nome.replace("ViewModel", "").replace("TO", "").replace("{","");
 }
@@ -271,11 +237,11 @@ function gerarRead(controllerName, classeName){
             bool sucessoAoBuscarDados = validationPaging${controllerName}TO.IsValid;
             if (sucessoAoBuscarDados)
             {
-                bool listaPreenchida = listaNegociacaoTO != null;
+                bool listaPreenchida = lista${controllerName} != null;
                 if (listaPreenchida)
                 {
                     validationResultViewModel.Result.DataSource = lista${controllerName}TO.Select(to => (${controllerName}ViewModel) to).ToList();
-                    validationResultViewModel.Result.Total = validationPagingPolitica${controllerName}TO.Result.Total;
+                    validationResultViewModel.Result.Total = validationPaging${controllerName}TO.Result.Total;
                 }
                 else
                 {
@@ -293,8 +259,8 @@ function gerarInsert(controllerName, classeName){
     var texto = `
         public JsonResult Inserir${classeName}([DataSourceRequest] DataSourceRequest request, ${controllerName}ViewModel viewModel)
         {
+            ValidarModelTO(viewModel);
             ${controllerName}TO to = (${controllerName}TO) viewModel;
-            ValidarModelTO(to);
 
             if (ModelState.IsValid)
             {

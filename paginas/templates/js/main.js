@@ -32,6 +32,7 @@ function Dados(Area,Solution,ControllerName, ClassePrincipal){
     Dados.prototype.ClassePrincipal = () => ClassePrincipal;
 
     Dados.prototype.PreencheCamposDefault = function() {
+        
         if(this.ControllerName == undefined){
             this.ControllerName = controller.value;
         }
@@ -39,7 +40,10 @@ function Dados(Area,Solution,ControllerName, ClassePrincipal){
             this.Area = area.value;
         }
         if(this.ClassePrincipal == undefined){
-            this.ClassePrincipal = classe.value;
+            this.ClassePrincipal = classeNome.value;
+        }
+        if(this.Solution == undefined){
+            this.Solution = solucao.value;
         }
     }
 }
@@ -78,7 +82,7 @@ function getNamespace(classe){
     }
     
     return dados;
-    }
+}
     
 function Tipo(tipo, nome){
     this.decimalNullAble = "decimal?";
