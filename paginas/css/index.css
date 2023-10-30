@@ -10,3 +10,11 @@ select{
 .main-div{
     width: 90vw;
 }
+
+.div-container{
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+    justify-content: center;
+    padding: 20px;
+}
