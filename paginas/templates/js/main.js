@@ -19,6 +19,9 @@ function exibeMensagemCentralizada(){
 
 }
 
+function validField(field){
+    return field.value != undefined && field.value.length != "";
+}
 
 function Dados(Area,Solution,ControllerName, ClassePrincipal){
     this.Area = Area;
@@ -33,16 +36,16 @@ function Dados(Area,Solution,ControllerName, ClassePrincipal){
 
     Dados.prototype.PreencheCamposDefault = function() {
         
-        if(this.ControllerName == undefined){
+        if(validField(controller)){
             this.ControllerName = controller.value;
         }
-        if(this.Area == undefined){
+        if( validField(area)){
             this.Area = area.value;
         }
-        if(this.ClassePrincipal == undefined){
+        if(validField(classeNome)){
             this.ClassePrincipal = classeNome.value;
         }
-        if(this.Solution == undefined){
+        if(validField(solucao)){
             this.Solution = solucao.value;
         }
     }
