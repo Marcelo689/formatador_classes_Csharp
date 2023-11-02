@@ -63,19 +63,35 @@ function CriarGrid(){
 
 function geraColunaGrid(nomePropriedade, tipoPropriedade, largura = "percentualLargura"){
 
+    //var biblioteca = ["int", "DateTime", "int?", "decimal", "string", "static"];
+    var estiloColunaCentralizada = "estiloColunaCentralizada";
     console.log(tipoPropriedade);
-    var estiloColuna = "estiloColunaCentralizada";
+    var saida = `\n          cols.Bound(c => c.${nomePropriedade})`;
+    var estiloColuna = estiloColunaCentralizada;
+
+    if(tipoPropriedade == "static"){
+        return "";
+    }
+
     if(tipoPropriedade == "string"){
         estiloColuna = "estiloColunaString";
     }else if(tipoPropriedade == "int"){
         estiloColuna = "estiloColunaInteira";
+    }else if(tipoPropriedade == "DateTime"){
+        estiloColuna = estiloColunaCentralizada;
+        saida += `.Format("{0:G}")`;
+    }else if(tipoPropriedade == "int?"){
+        estiloColuna = estiloColunaCentralizada;
     }
 
-    return `\n          cols.Bound(c => c.${nomePropriedade})
-                .Width(${largura})
-                .Editable("Functions.naoEditavel")
-                .HeaderHtmlAttributes(${estiloColuna})
-                .HtmlAttributes(${estiloColuna});`;
+
+    saida += `
+    .Width(${largura})
+    .Editable("Functions.naoEditavel")
+    .HeaderHtmlAttributes(${estiloColuna})
+    .HtmlAttributes(${estiloColuna});`;
+
+    return saida;
 }
 
 function contemPalavrasIndesejadas(palavra, palavrasIndesejadas){

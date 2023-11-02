@@ -238,6 +238,7 @@ function gerarRead(controllerName, classeName){
             TratarModelo(filtrosTO);
 
             ValidationResult<PagingResult<${classeName}ViewModel>> validationResultViewModel = new ValidationResult<PagingResult<${classeName}ViewModel>>();
+            validationResultViewModel.Result = new PagingResult<ControleRegulagemLinhaDestalaViewModel>();
             ValidationResult<PagingResult<${classeName}TO>> validationPaging${classeName}TO = i${controllerName}AppService.GetLista${classeName}(filtrosTO);
             IEnumerable<${classeName}TO> lista${classeName}TO = validationPaging${classeName}TO.Result.DataSource;
 
