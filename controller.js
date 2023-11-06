@@ -127,6 +127,8 @@ function gerarValidacaoModel(listaPropriedades, nomeClassePrincipal, areaName, c
 function gerarArquivoController(){
     var classeConteudo = entrada.value;
     var dados = getNamespace(classeConteudo);
+
+    dados.PreencheCamposDefault();
     dados.ClassePrincipal = normalizaClasseName(dados.ClassePrincipal);
     
     var areaName = dados.Area;
@@ -238,7 +240,7 @@ function gerarRead(controllerName, classeName){
             TratarModelo(filtrosTO);
 
             ValidationResult<PagingResult<${classeName}ViewModel>> validationResultViewModel = new ValidationResult<PagingResult<${classeName}ViewModel>>();
-            validationResultViewModel.Result = new PagingResult<ControleRegulagemLinhaDestalaViewModel>();
+            validationResultViewModel.Result = new PagingResult<${classeName}ViewModel>();
             ValidationResult<PagingResult<${classeName}TO>> validationPaging${classeName}TO = i${controllerName}AppService.GetLista${classeName}(filtrosTO);
             IEnumerable<${classeName}TO> lista${classeName}TO = validationPaging${classeName}TO.Result.DataSource;
 

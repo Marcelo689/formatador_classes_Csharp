@@ -5,6 +5,19 @@ function copiaAposFormatado(){
     document.getSelection().empty();
 }
 
+document.addEventListener("DOMContentLoaded", function (e){
+    tela.addEventListener("change", function (evento){
+        btnCarregar.click();
+        
+        setTimeout(function(){
+            if(btnFormatar != undefined){
+                btnFormatar.click();
+            }
+        } , 1000);
+    });
+})
+
+
 function exibeMensagemCentralizada(){
     var corpo = document.getElementsByTagName('body')[0];
 

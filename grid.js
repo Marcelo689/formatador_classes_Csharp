@@ -47,6 +47,7 @@ function CriarGrid(){
     })
     .DataSource(dataSource => dataSource
     .Ajax()
+    .Model( e => e.Id( f => f.Id))
     .PageSize(tamanhoPaginaInicial)
     .Read(read => read.Action("Read${controllerName}", CONTROLLER_NAME, AREA).Data("Functions.getParamsRead${nomeReduzidoClasse}(this, "+Model+")"))
     .Events( ev => {
