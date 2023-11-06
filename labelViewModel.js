@@ -36,13 +36,21 @@ function ignorarLinhaCasoConterPalavrasChave(linha){
 
 function contemPalavrasIndesejadas(palavra){
 
-    var listaPalavrasExcluidas = ["id","Id","TO", "class"];
+    var listaPalavrasExcluidas = ["Id","TO", "class"];
     return contemNaLista(palavra, listaPalavrasExcluidas);
 }
 
 function contemNaLista(palavra, lista){
     for (let index = 0; index < lista.length; index++) {
         const item = lista[index];
+
+        if(item == "TO"){
+
+            var contemTO = palavra.indexOf(item) != -1;
+            if(contemTO)
+                return true;            
+        }else
+
         if(palavra.toLowerCase().indexOf(item.toLowerCase()) != -1){
             return true;
         }
@@ -76,6 +84,9 @@ function encontraIndiceUltimoCaractere(textoClasse){
 function retornaPropriedadeComDataAnotation(classe){
 
     var dados = getNamespace(classe);
+
+    dados.PreencheCamposDefault();
+
     var nomeSolucao = dados.Solution;
     var nomeArea = dados.Area;
     var nomeController = dados.ControllerName;
@@ -185,8 +196,6 @@ function gerarExplictCastTO(nomeClasse, listaPropriedades){
 
     return explicitoCast;
 }
-
-
 
 function RetornaDataAnotations(){
     var entradaString = entrada.value;

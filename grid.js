@@ -5,57 +5,64 @@ function CriarGrid(){
     var classeCompleta     = entrada.value;   
     
     var dados = getNamespace(entrada.value);
-    
+    dados.PreencheCamposDefault();
+
     var nomeReduzidoClasse = normalizaClasseName(dados.ClassePrincipal);
     var controllerName     = dados.ControllerName;
-    var nomeSolucao        = dados.Solution;
     var areaName           = dados.Area; 
-    var numeroPropriedades = 10;
 
-    var cabecalho = `
-    @using ${nomeSolucao}.Web.Areas.${areaName}.Models.${controllerName}
-    @model ${controllerName}ViewModel
-
+   var grid =  `
+    @using Universal.Tois.${dados.Solution}.Web.Areas.${dados.Area}.Models.${dados.ControllerName}
+    @model int
     @{
         const string CONTROLLER_NAME = "${controllerName}";
-        object AREA = "${controllerName}";
-        var estiloColunaInteira      = new { style = "text-align:right" };
-        var estiloColunaString       = new { style = "text-align:left" };
+        string GRID_NAME = CONTROLLER_NAME + "Grid" + Model.ToString();
+        object AREA = "${areaName}";
+        var estiloColunaInteira = new { style = "text-align:right" };
+        var estiloColunaString = new { style = "text-align:left" };
         var estiloColunaCentralizada = new { style = "text-align:center" };
 
         var tamanhoPaginaInicial = 10;
-        
-        int numeroColunas = ${numeroPropriedades};
+
+        int numeroColunas = 10;
         var larguraPorColuna = 100 / numeroColunas;
         var percentualLargura = larguraPorColuna.ToString() + "%";
-    }\n\n
-    `
-    var grid = cabecalho +
-    `@(Html.Kendo().Grid<${controllerName}ViewModel>()
-        .Name("grid")
-        .Pageable(pageable => pageable.
-            PageSizes( new int[]{ tamanhoPaginaInicial, tamanhoPaginaInicial *2 , tamanhoPaginaInicial * 3})
-        )
-        .Columns(cols =>
-        {`;
-        grid += RetornaColumns(classeCompleta);
-        grid += `\n         cols.Command(command =>
-        {
-            command.Edit();
-            command.Destroy();
-        }).Width(200);
-    })
-    .ToolBar(toolbar => toolbar.Create())
-    .Editable(editable => editable.Mode(GridEditMode.InLine))
-    .DataSource(dataSource => dataSource
-        .Ajax()
-        .PageSize(tamanhoPaginaInicial)
-        .Read(read => read.Action("Read${nomeReduzidoClasse}", CONTROLLER_NAME, AREA}))
-        .Create(create => create.Action("Inserir${nomeReduzidoClasse}", CONTROLLER_NAME, AREA}))
-        .Update(update => update.Action("Atualizar${nomeReduzidoClasse}", CONTROLLER_NAME, AREA}))
-        .Destroy(destroy => destroy.Action("Remover${nomeReduzidoClasse}", CONTROLLER_NAME, AREA}))
-    )`
+    }
 
+    @(Html.Kendo().Grid<${nomeReduzidoClasse}ViewModel>()
+        .Name(GRID_NAME)
+        .Pageable(pageable => pageable.
+        PageSizes( new int[]{ tamanhoPaginaInicial, tamanhoPaginaInicial *2 , tamanhoPaginaInicial * 3})
+        )
+    .Columns(cols =>
+    {`;
+    var colunas = RetornaColumns(classeCompleta);
+    grid += colunas;
+    grid += `\n         //cols.Command(command =>
+                        //{
+        //command.Edit();
+        //command.Destroy();
+    //}).Width(200);
+   
+    })
+    .DataSource(dataSource => dataSource
+    .Ajax()
+    .PageSize(tamanhoPaginaInicial)
+    .Read(read => read.Action("Read${controllerName}", CONTROLLER_NAME, AREA).Data("Functions.getParamsRead${nomeReduzidoClasse}(this, "+Model+")"))
+    .Events( ev => {
+        ev.RequestStart("OpenLoadingWindow");
+        ev.RequestEnd("CloseLoadingWindow");
+    })
+    ).Events( ev =>
+    {
+        ev.DetailInit("Events.detailInitInner${nomeReduzidoClasse}Grid");
+    })
+    )
+
+<script>
+    Variables.detailInitInner${nomeReduzidoClasse}Grid = '@Url.Action("${nomeReduzidoClasse}InnerTabStripDetailInit", CONTROLLER_NAME, AREA)';
+</script>
+    `;
     saida.innerHTML = grid;
     
     copiaAposFormatado();
@@ -86,10 +93,10 @@ function geraColunaGrid(nomePropriedade, tipoPropriedade, largura = "percentualL
 
 
     saida += `
-    .Width(${largura})
-    .Editable("Functions.naoEditavel")
-    .HeaderHtmlAttributes(${estiloColuna})
-    .HtmlAttributes(${estiloColuna});`;
+                        .Width(${largura})
+                        .Editable("Functions.naoEditavel")
+                        .HeaderHtmlAttributes(${estiloColuna})
+                        .HtmlAttributes(${estiloColuna});`;
 
     return saida;
 }
