@@ -5,6 +5,19 @@ function copiaAposFormatado(){
     document.getSelection().empty();
 }
 
+document.addEventListener("DOMContentLoaded", function (e){
+    tela.addEventListener("change", function (evento){
+        btnCarregar.click();
+        
+        setTimeout(function(){
+            if(btnFormatar != undefined){
+                btnFormatar.click();
+            }
+        } , 1000);
+    });
+})
+
+
 function exibeMensagemCentralizada(){
     var corpo = document.getElementsByTagName('body')[0];
 
@@ -35,20 +48,41 @@ function Dados(Area,Solution,ControllerName, ClassePrincipal){
     Dados.prototype.ClassePrincipal = () => ClassePrincipal;
 
     Dados.prototype.PreencheCamposDefault = function() {
-        
+        var contadorCamposValidos = 0;
         if(validField(controller)){
             this.ControllerName = controller.value;
+            contadorCamposValidos++;
         }
         if( validField(area)){
             this.Area = area.value;
+            contadorCamposValidos++;
         }
         if(validField(classeNome)){
-            this.ClassePrincipal = classeNome.value;
+            this.ClassePrincipal = normalizaClasseName(classeNome.value);
+            contadorCamposValidos++;
         }
         if(validField(solucao)){
             this.Solution = solucao.value;
+            contadorCamposValidos++;
         }
+
+        if(contadorCamposValidos == 4)
+            return true;
+        else
+            return false;
     }
+}
+
+function normalizaClasseName(nome){
+    nome = nome.replace("ViewModel", "");
+    nome = nome.replace("TO", "");
+    nome = nome.replace("{","");
+
+    return nome;
+}
+
+function normalizaClasseNameFilter(nome){
+    return nome.replace("Filter", "");
 }
 
 function getNamespace(classe){
@@ -56,32 +90,53 @@ function getNamespace(classe){
     var dados = new Dados();
     var linhas = classe.split("\n");
     
-    dados.PreencheCamposDefault();
+    var foiPreenchido = dados.PreencheCamposDefault();
+    var naoFoiPreenchido = !foiPreenchido;
 
-    for (let indice = 0; indice < linhas.length; indice++) {
-    
-        var linha = linhas[indice]; 
-        var haNamespace = linha.indexOf("namespace") != -1;
-    
-        var haClassName = linha.indexOf("class") != -1;
-    
-        if(haNamespace){
-            var linhaNamespace = linha.trimLeft().split(".");
-    
-            var solutionName = linhaNamespace[0].split(" ")[1];
-            var areaName = linhaNamespace[3];
-            var controllerName = linhaNamespace[5];
-    
-            dados.Area = areaName;
-            dados.Solution = solutionName;
-            dados.ControllerName = normalizeString(controllerName).replace("{", "");
-    
-        }else if(haClassName){
-            var mainClassName = linha.trimLeft().split(" ")[2];
-            dados.ClassePrincipal = mainClassName;
-            return dados;
-        }
+    if(naoFoiPreenchido){
+
+        for (let indice = 0; indice < linhas.length; indice++) {
         
+            var linha = linhas[indice]; 
+            var haNamespace = linha.indexOf("namespace") != -1;
+        
+            var haClassName = linha.indexOf("class") != -1;
+        
+            if(haNamespace){
+                var linhaNamespace = linha.replace("namespace ", "").trimLeft().split(".");
+                var quantidadeRecortes = linhaNamespace.length;
+
+                var indiceControler = quantidadeRecortes-1;
+                var indiceArea = indiceControler -2;
+                var indiceSolucao = indiceArea - 3;
+
+                var solutionName = linhaNamespace[indiceSolucao];
+                var areaName = linhaNamespace[indiceArea];
+                var controllerName = linhaNamespace[indiceControler];
+        
+                if(areaName == undefined){
+                    areaName = area.value;
+                }
+
+                dados.Area = areaName;
+
+                if(solutionName == undefined){
+                    solutionName = solucao.value;
+                }
+                dados.Solution = solutionName;
+
+                if(controllerName == undefined){
+                    controllerName = controller.value;
+                }
+
+                dados.ControllerName = normalizeString(controllerName).replace("{", "");
+        
+            }else if(haClassName){
+                var mainClassName = linha.trimLeft().split(" ")[2];
+                dados.ClassePrincipal = normalizaClasseName(mainClassName);
+                return dados;
+            }
+        }
     }
     
     return dados;

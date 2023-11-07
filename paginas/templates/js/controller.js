@@ -124,15 +124,13 @@ function gerarValidacaoModel(listaPropriedades, nomeClassePrincipal, areaName, c
     return saida;
 }
 
-function normalizaClasseName(nome){
-    return nome.replace("ViewModel", "").replace("TO", "").replace("{","");
-}
-
 function gerarArquivoController(){
     var classeConteudo = entrada.value;
     var dados = getNamespace(classeConteudo);
-    dados.ClassePrincipal = normalizaClasseName(dados.ClassePrincipal);
 
+    dados.PreencheCamposDefault();
+    dados.ClassePrincipal = normalizaClasseName(dados.ClassePrincipal);
+    
     var areaName = dados.Area;
     var controllerName = dados.ControllerName;
     var solutionName = dados.Solution;
@@ -185,8 +183,20 @@ function getListProps(classe){
 
 function geraNamespace(solutionName, areaName, controllerName){
     var texto = `
-using Universal.Web.Mvc.Extensions;
-using Universal.Web.Telerik.Mvc5.Extensions;
+    using Kendo.Mvc.UI;
+    using Universal.Validation;
+    using Universal.Data.Pagination;
+    using Universal.Tois.${solutionName}.Contracts.Interface.AppService;
+    using Universal.Tois.${solutionName}.Web.Areas.${areaName}.Models.${controllerName};
+    using System.Web.Http.Results;
+    using Kendo.Mvc.Extensions;
+    using Universal.Web.Telerik.Mvc5.Extensions;
+    using System.Web.Mvc;
+    using Universal.Tois.${solutionName}.Dto.Common;
+    using Universal.Web.Mvc.Extensions;
+    using Universal.Tois.${solutionName}.Dto.${controllerName};
+    using System.Collections.Generic;
+    using System.Linq;
 
 namespace Universal.Tois.${solutionName}.Web.Areas.${areaName}.Controllers
 {
@@ -219,29 +229,29 @@ function gerarControlador(NomeController){
 }
 
 function gerarRead(controllerName, classeName){
-
+    var classeNormalizada = classeName.replace("ViewModel", "");
     var texto = `
-        public JsonResult Read${classeName}([DataSourceRequest] DataSourceRequest request, ${controllerName}FilterViewModel filtrosViewModel)
+        public JsonResult Read${classeNormalizada}([DataSourceRequest] DataSourceRequest request, ${classeNormalizada}FilterViewModel filtrosViewModel)
         {
-            ${controllerName}FilterViewModelTO filtrosTO = (${controllerName}FilterViewModelTO) filtrosViewModel;
+            ${classeNormalizada}FilterTO filtrosTO = (${classeNormalizada}FilterTO) filtrosViewModel;
 
             filtrosTO.PagingParameterTO = new PagingParameterTO(request.Page, request.PageSize);
 
             TratarModelo(filtrosTO);
 
-            ValidationResult<PagingResult<${controllerName}ViewModel>> validationResultViewModel = new ValidationResult<PagingResult<${controllerName}ViewModel>>();
-            validationResultViewModel.Result = new PagingResult<${controllerName}ViewModel>();
-            ValidationResult<PagingResult<${controllerName}TO>> validationPaging${controllerName}TO = i${controllerName}AppService.GetLista${controllerName}(filtrosTO);
-            IEnumerable<${controllerName}TO> lista${controllerName}TO = validationPaging${controllerName}TO.Result.DataSource;
+            ValidationResult<PagingResult<${classeName}ViewModel>> validationResultViewModel = new ValidationResult<PagingResult<${classeName}ViewModel>>();
+            validationResultViewModel.Result = new PagingResult<${classeName}ViewModel>();
+            ValidationResult<PagingResult<${classeName}TO>> validationPaging${classeName}TO = i${controllerName}AppService.GetLista${classeName}(filtrosTO);
+            IEnumerable<${classeName}TO> lista${classeName}TO = validationPaging${classeName}TO.Result.DataSource;
 
-            bool sucessoAoBuscarDados = validationPaging${controllerName}TO.IsValid;
+            bool sucessoAoBuscarDados = validationPaging${classeName}TO.IsValid;
             if (sucessoAoBuscarDados)
             {
-                bool listaPreenchida = lista${controllerName} != null;
+                bool listaPreenchida = lista${classeName}TO != null;
                 if (listaPreenchida)
                 {
-                    validationResultViewModel.Result.DataSource = lista${controllerName}TO.Select(to => (${controllerName}ViewModel) to).ToList();
-                    validationResultViewModel.Result.Total = validationPaging${controllerName}TO.Result.Total;
+                    validationResultViewModel.Result.DataSource = lista${classeName}TO.Select(to => (${classeName}ViewModel) to).ToList();
+                    validationResultViewModel.Result.Total = validationPaging${classeName}TO.Result.Total;
                 }
                 else
                 {

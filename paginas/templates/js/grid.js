@@ -1,64 +1,69 @@
 var classe = document.getElementById("entrada");
 
-function normalizaClasseName(nome){
-    return nome.replace("ViewModel", "").replace("TO", "").replace("{","");
-}
 
 function CriarGrid(){
     var classeCompleta     = entrada.value;   
     
     var dados = getNamespace(entrada.value);
-    
+    dados.PreencheCamposDefault();
+
     var nomeReduzidoClasse = normalizaClasseName(dados.ClassePrincipal);
     var controllerName     = dados.ControllerName;
-    var nomeSolucao        = dados.Solution;
     var areaName           = dados.Area; 
-    var numeroPropriedades = 10;
 
-    var cabecalho = `
-    @using ${nomeSolucao}.Web.Areas.${areaName}.Models.${controllerName}
-    @model ${controllerName}ViewModel
-
+   var grid =  `
+    @using Universal.Tois.${dados.Solution}.Web.Areas.${dados.Area}.Models.${dados.ControllerName}
+    @model int
     @{
         const string CONTROLLER_NAME = "${controllerName}";
-        object AREA = "${controllerName}";
-        var estiloColunaInteira      = new { style = "text-align:right" };
-        var estiloColunaString       = new { style = "text-align:left" };
+        string GRID_NAME = CONTROLLER_NAME + "Grid" + Model.ToString();
+        object AREA = "${areaName}";
+        var estiloColunaInteira = new { style = "text-align:right" };
+        var estiloColunaString = new { style = "text-align:left" };
         var estiloColunaCentralizada = new { style = "text-align:center" };
 
         var tamanhoPaginaInicial = 10;
-        
-        int numeroColunas = ${numeroPropriedades};
+
+        int numeroColunas = 10;
         var larguraPorColuna = 100 / numeroColunas;
         var percentualLargura = larguraPorColuna.ToString() + "%";
-    }\n\n
-    `
-    var grid = cabecalho +
-    `@(Html.Kendo().Grid<${controllerName}ViewModel>()
-        .Name("grid")
-        .Pageable(pageable => pageable.
-            PageSizes( new int[]{ tamanhoPaginaInicial, tamanhoPaginaInicial *2 , tamanhoPaginaInicial * 3})
-        )
-        .Columns(cols =>
-        {`;
-        grid += RetornaColumns(classeCompleta);
-        grid += `\n         cols.Command(command =>
-        {
-            command.Edit();
-            command.Destroy();
-        }).Width(200);
-    })
-    .ToolBar(toolbar => toolbar.Create())
-    .Editable(editable => editable.Mode(GridEditMode.InLine))
-    .DataSource(dataSource => dataSource
-        .Ajax()
-        .PageSize(tamanhoPaginaInicial)
-        .Read(read => read.Action("Read${nomeReduzidoClasse}", CONTROLLER_NAME, AREA}))
-        .Create(create => create.Action("Inserir${nomeReduzidoClasse}", CONTROLLER_NAME, AREA}))
-        .Update(update => update.Action("Atualizar${nomeReduzidoClasse}", CONTROLLER_NAME, AREA}))
-        .Destroy(destroy => destroy.Action("Remover${nomeReduzidoClasse}", CONTROLLER_NAME, AREA}))
-    )`
+    }
 
+    @(Html.Kendo().Grid<${nomeReduzidoClasse}ViewModel>()
+        .Name(GRID_NAME)
+        .Pageable(pageable => pageable.
+        PageSizes( new int[]{ tamanhoPaginaInicial, tamanhoPaginaInicial *2 , tamanhoPaginaInicial * 3})
+        )
+    .Columns(cols =>
+    {`;
+    var colunas = RetornaColumns(classeCompleta);
+    grid += colunas;
+    grid += `\n         //cols.Command(command =>
+                        //{
+        //command.Edit();
+        //command.Destroy();
+    //}).Width(200);
+   
+    })
+    .DataSource(dataSource => dataSource
+    .Ajax()
+    .Model( e => e.Id( f => f.Id))
+    .PageSize(tamanhoPaginaInicial)
+    .Read(read => read.Action("Read${controllerName}", CONTROLLER_NAME, AREA).Data("Functions.getParamsRead${nomeReduzidoClasse}(this, "+Model+")"))
+    .Events( ev => {
+        ev.RequestStart("OpenLoadingWindow");
+        ev.RequestEnd("CloseLoadingWindow");
+    })
+    ).Events( ev =>
+    {
+        ev.DetailInit("Events.detailInit${nomeReduzidoClasse}Grid");
+    })
+    )
+
+<script>
+    Variables.detailInit${nomeReduzidoClasse}Grid = '@Url.Action("${nomeReduzidoClasse}DetailInit", CONTROLLER_NAME, AREA)';
+</script>
+    `;
     saida.innerHTML = grid;
     
     copiaAposFormatado();
@@ -66,19 +71,36 @@ function CriarGrid(){
 
 function geraColunaGrid(nomePropriedade, tipoPropriedade, largura = "percentualLargura"){
 
+    //var biblioteca = ["int", "DateTime", "int?", "decimal", "string", "static"];
+    var estiloColunaCentralizada = "estiloColunaCentralizada";
     console.log(tipoPropriedade);
-    var estiloColuna = "estiloColunaCentralizada";
+    var saida = `\n          cols.Bound(c => c.${nomePropriedade})`;
+    var estiloColuna = estiloColunaCentralizada;
+
+    if(tipoPropriedade == "static"){
+        return "";
+    }
+
     if(tipoPropriedade == "string"){
         estiloColuna = "estiloColunaString";
     }else if(tipoPropriedade == "int"){
         estiloColuna = "estiloColunaInteira";
+    }else if(tipoPropriedade == "DateTime"){
+        estiloColuna = estiloColunaCentralizada;
+        saida += `.Format("{0:G}")`;
+    }else if(tipoPropriedade == "int?"){
+        estiloColuna = estiloColunaCentralizada;
+        saida += `.ClientTemplate("#=${nomePropriedade.replace("Codigo", "")}Descricao#")`
     }
 
-    return `\n          cols.Bound(c => c.${nomePropriedade})
-                .Width(${largura})
-                .Editable("Functions.naoEditavel")
-                .HeaderHtmlAttributes(${estiloColuna})
-                .HtmlAttributes(${estiloColuna});`;
+
+    saida += `
+                        .Width(${largura})
+                        .Editable("Functions.naoEditavel")
+                        .HeaderHtmlAttributes(${estiloColuna})
+                        .HtmlAttributes(${estiloColuna});`;
+
+    return saida;
 }
 
 function contemPalavrasIndesejadas(palavra, palavrasIndesejadas){

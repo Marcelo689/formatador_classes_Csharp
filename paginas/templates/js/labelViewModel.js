@@ -23,8 +23,54 @@ function retornaCaminhoDataType(tipoVariavel){
 }
 
 function formataAnnotation(solutionName,areaName, controllerName, propertyName){
-    return `\n      [Display(ResourceType = typeof(${solutionName}.Web.App_GlobalResources.${areaName}.${controllerName}),
-        Name = nameof(Web.App_GlobalResources.${areaName}.${controllerName}.label${propertyName}))]`
+
+    const propDescricaoDeCodigo = propertyName.indexOf("Descricao") != -1;
+    const propCodigo = propertyName.indexOf("Codigo") != -1;
+
+    var codigo = "";
+    if(propDescricaoDeCodigo){
+        return "";
+    }else if(propCodigo){
+        propertyName = propertyName.replace("Codigo", "");
+        codigo = "Descricao";
+    }
+
+    return `\n      [Display(ResourceType = typeof(Universal.Tois.${solutionName}.Web.App_GlobalResources.${areaName}.${controllerName}),
+        Name = nameof(Universal.Tois.${solutionName}.Web.App_GlobalResources.${areaName}.${controllerName}.label${propertyName}${codigo}))]`
+}
+
+function adicionaKendoTemplate(tipoPropriedade, nomePropriedade){
+
+    const ehPropriedadeDescricaoDeCodigo = nomePropriedade.indexOf("Descricao") != -1;
+    if(ehPropriedadeDescricaoDeCodigo){
+        return "";
+    }
+
+    var templateProp = "String";
+
+    switch(tipoPropriedade){
+
+        case "DateTime":
+            templateProp = "DateTime";
+            break;
+        case "DateTime?":
+            templateProp = "DateTime";
+            break;
+        case "int?":
+            templateProp = `${nomePropriedade}ComboBox`;
+            break;
+        case "string":
+            templateProp = "String";
+            break;
+        case "decimal":
+            templateProp = "Decimal_6_2";
+            break;
+        case "int":
+            templateProp = "Integer";
+            break;
+    }
+
+    return `        [UIHint(@"Kendo\\${templateProp}")]\n`;
 }
 
 function ignorarLinhaCasoConterPalavrasChave(linha){
@@ -36,14 +82,21 @@ function ignorarLinhaCasoConterPalavrasChave(linha){
 
 function contemPalavrasIndesejadas(palavra){
 
-    var listaPalavrasExcluidas = ["id", "class"];
-    var listaPalavrasExcluidas = [];
+    var listaPalavrasExcluidas = ["Id","TO", "class"];
     return contemNaLista(palavra, listaPalavrasExcluidas);
 }
 
 function contemNaLista(palavra, lista){
     for (let index = 0; index < lista.length; index++) {
         const item = lista[index];
+
+        if(item == "TO"){
+
+            var contemTO = palavra.indexOf(item) != -1;
+            if(contemTO)
+                return true;            
+        }else
+
         if(palavra.toLowerCase().indexOf(item.toLowerCase()) != -1){
             return true;
         }
@@ -77,13 +130,18 @@ function encontraIndiceUltimoCaractere(textoClasse){
 function retornaPropriedadeComDataAnotation(classe){
 
     var dados = getNamespace(classe);
-    var saida = "";
+
+    dados.PreencheCamposDefault();
+
     var nomeSolucao = dados.Solution;
     var nomeArea = dados.Area;
     var nomeController = dados.ControllerName;
     var listaPropriedades = [];
-
+    
     var nomeClasse = dados.ClassePrincipal;
+
+    var saida = `using System.ComponentModel.DataAnnotations;
+    using Universal.Tois.${nomeSolucao}.Dto.${normalizaClasseNameFilter(nomeClasse)};\n`;
     var explicitOperador = "public static explicit operator";
 
     var indiceUltimo = encontraIndiceUltimoCaractere(classe);
@@ -124,17 +182,20 @@ function retornaPropriedadeComDataAnotation(classe){
             var contemClass = linha.indexOf("class") != -1;
             
             if(contemClass){
+                linha = normalizaClasseName(linha);
                 nomeClasse = linha.trimLeft().split(" ")[2].replace("{","");
                 nomeClasse = nomeClasse.replace("TO","ViewModel");
-                saida += "\n" + linha.replace("TO","ViewModel") + "\n";
+                saida += "\n" + linha.replace("TO","ViewModel") + "ViewModel" + "\n";
                 continue;
             }
 
             var nomePropriedade = linha.substr(indicePublic).split(" ")[2];
+            var tipoPropriedade = linha.substr(indicePublic).split(" ")[1];
             listaPropriedades.push(nomePropriedade);
 
             if(!contemPalavrasIndesejadas(nomePropriedade)){
                 saida +=  formataAnnotation(nomeSolucao, nomeArea, nomeController, nomePropriedade) + "\n" ;
+                saida += adicionaKendoTemplate(tipoPropriedade, nomePropriedade);
             }else{
                 saida += "\n";
             }
@@ -143,6 +204,7 @@ function retornaPropriedadeComDataAnotation(classe){
 
         if(index == linhas.length -2){
             saida += gerarExplictCast(nomeClasse, listaPropriedades);
+            saida += gerarExplictCastTO(nomeClasse, listaPropriedades);
         }
         saida += linha;
     }
@@ -151,9 +213,25 @@ function retornaPropriedadeComDataAnotation(classe){
 }
 
 function gerarExplictCast(nomeClasse, listaPropriedades){
-    var explicitoCast =  `\n        public static explicit operator ${nomeClasse}(${nomeClasse.replace("ViewModel","")}TO to)
+    var explicitoCast =  `\n        public static explicit operator ${nomeClasse}ViewModel(${nomeClasse.replace("ViewModel","")}TO to)
         {
-            return new ${nomeClasse}{\n`;
+            return new ${nomeClasse}ViewModel{\n`;
+    var propriedadesCast = "";
+                
+    for (const propriedade of listaPropriedades) {
+        
+        propriedadesCast += `                ${propriedade} = to.${propriedade},\n`
+    }
+        explicitoCast += propriedadesCast +`            };
+        }\n`;
+
+    return explicitoCast;
+}
+
+function gerarExplictCastTO(nomeClasse, listaPropriedades){
+    var explicitoCast =  `\n        public static explicit operator ${nomeClasse}TO(${nomeClasse.replace("ViewModel","")}ViewModel to)
+        {
+            return new ${nomeClasse}TO{\n`;
     var propriedadesCast = "";
                 
     for (const propriedade of listaPropriedades) {
