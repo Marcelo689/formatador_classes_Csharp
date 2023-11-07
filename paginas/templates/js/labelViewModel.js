@@ -57,7 +57,7 @@ function adicionaKendoTemplate(tipoPropriedade, nomePropriedade){
             templateProp = "DateTime";
             break;
         case "int?":
-            templateProp = `${nomePropriedade}ComboBox`;
+            templateProp = `${normalizaNomePropriedade(nomePropriedade)}ComboBox`;
             break;
         case "string":
             templateProp = "String";

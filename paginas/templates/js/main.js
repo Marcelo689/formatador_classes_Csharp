@@ -18,6 +18,25 @@ document.addEventListener("DOMContentLoaded", function (e){
 })
 
 
+function normalizaNomePropriedade(palavra){
+    var lista = ["Codigo"];
+    return apagaPalavrasNaLista(palavra, lista);
+}   
+
+function apagaPalavrasNaLista(palavra, lista){
+
+    for (let indice = 0; indice < lista.length; indice++) {
+        const item = lista[indice];
+        
+        const contemPalavraDaLista = palavra.indexOf(item) != -1;
+        if(contemPalavraDaLista){
+            palavra = palavra.replace(item, "");
+        }
+    }
+
+    return palavra;
+}
+
 function exibeMensagemCentralizada(){
     var corpo = document.getElementsByTagName('body')[0];
 
@@ -141,19 +160,23 @@ function getNamespace(classe){
     
     return dados;
 }
-    
+ 
 function Tipo(tipo, nome){
     this.decimalNullAble = "decimal?";
     this.intNullAble = "int?";
     this.string = "string";
     this.int = "int";
     this.bool = "bool";
-
+    this.datetime = "DateTime"; 
+    this.datetimeNullable = "DateTime?";
+    
     Tipo.prototype.decimalNullAble = () => this.decimalNullAble;
     Tipo.prototype.intNullAble = () => this.intNullAble;
     Tipo.prototype.string = () => this.string;
     Tipo.prototype.int = () => this.int;
     Tipo.prototype.bool = () => this.bool;
+    Tipo.prototype.datetime = () => this.datetime;
+    Tipo.prototype.datetimeNullable = () => this.datetimeNullable;
 }
 
 var TiposCSharp = {
