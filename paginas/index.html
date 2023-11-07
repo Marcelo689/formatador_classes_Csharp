@@ -20,7 +20,7 @@
             <option value="templates/gerarControllerKendo.html">Criar Controller</option>
             <option value="templates/gerarGridKendo.html">Criar Grid</option>
         </select>
-        <button onclick="Carregar()">
+        <button id="btnCarregar" onclick="Carregar()">
             Carregar
         </button>
 
@@ -32,13 +32,19 @@
                 <label for="solucao">Solution</label>
                 <input type="text" id="solucao">
             </div>
-
+            
             <div class="row div-container">
                 <label for="area">Area</label>
                 <input type="text" id="area">
                 <label for="classeNome">Classe</label>
                 <input type="text" id="classeNome">
             </div>
+            
+        </div>
+        <label for="entrada">Cole a classe com namespace (de preferencia TO)C#</label>
+        <h2> Example : "namespace Universal.Tois.Fabrica.Web.Areas.Operacoes.Models.ControleRegulagemLinha"</h2>
+        <div class="container">
+            <textarea height="50vh" spellcheck="false" id="entrada"></textarea>
         </div>
 
     </div>
