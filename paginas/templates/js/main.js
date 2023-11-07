@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function (e){
 
 
 function normalizaNomePropriedade(palavra){
-    var lista = ["Codigo"];
+    var lista = ["Codigo","Descricao"];
     return apagaPalavrasNaLista(palavra, lista);
 }   
 
@@ -48,6 +48,46 @@ function exibeMensagemCentralizada(){
     setTimeout(function(){
         div.remove();
     }, 700)
+
+}
+
+function ehPropriedadeComposta(nomePropriedade){
+
+    const propriedadeEhComposta = contarNumeroLetrasMaiusculas(nomePropriedade) > 1;
+    return propriedadeEhComposta;
+}
+
+function sePropriedadeContemPalavra(propriedade, listaPalavras){
+
+    var contem = false;
+    for (palavra of listaPalavras){
+        const existeMatch = propriedade.indexOf(palavra) != -1;
+
+        if(existeMatch){
+            contem = true;
+            return contem;
+        }
+
+    };
+
+    return contem;
+}
+
+function contarNumeroLetrasMaiusculas(nomePropriedade){
+
+    var contador = 0;
+    for (let indice = 0; indice < nomePropriedade.length; indice++) {
+        const letra = nomePropriedade[indice];
+
+        const letraVersaoMaiuscula = letra.toUpperCase();
+
+        const IsMaiuscula = letra == letraVersaoMaiuscula;
+        if(IsMaiuscula){
+            contador++;
+        }
+    }
+
+    return contador;
 
 }
 
@@ -92,9 +132,15 @@ function Dados(Area,Solution,ControllerName, ClassePrincipal){
     }
 }
 
-function normalizaClasseName(nome){
+function normalizaClassTOViewModel(nome){
     nome = nome.replace("ViewModel", "");
     nome = nome.replace("TO", "");
+
+    return nome
+}
+
+function normalizaClasseName(nome){
+    nome = normalizaClassTOViewModel(nome);
     nome = nome.replace("{","");
 
     return nome;

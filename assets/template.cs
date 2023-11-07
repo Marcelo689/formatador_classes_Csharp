@@ -11,3 +11,4 @@ namespace Universal.Fabrica.Web.Areas.Operacoes.Models.CadastrarTemplate{
         public string TipoBananaDescricao {get;set;}
     }
 }
+

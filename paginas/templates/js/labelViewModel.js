@@ -182,10 +182,16 @@ function retornaPropriedadeComDataAnotation(classe){
             var contemClass = linha.indexOf("class") != -1;
             
             if(contemClass){
-                linha = normalizaClasseName(linha);
+                linha = normalizaClassTOViewModel(linha);
+
+                const existeBracket = linha.indexOf("{") != -1;
+
+                if(existeBracket){
+                    linha = linha.replace("{", "ViewModel{")
+                }
+
                 nomeClasse = linha.trimLeft().split(" ")[2].replace("{","");
-                nomeClasse = nomeClasse.replace("TO","ViewModel");
-                saida += "\n" + linha.replace("TO","ViewModel") + "ViewModel" + "\n";
+                saida += "\n" + linha + "\n";
                 continue;
             }
 

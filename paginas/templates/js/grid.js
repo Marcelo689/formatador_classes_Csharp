@@ -103,19 +103,12 @@ function geraColunaGrid(nomePropriedade, tipoPropriedade, largura = "percentualL
     return saida;
 }
 
-function contemPalavrasIndesejadas(palavra, palavrasIndesejadas){
-
-    var listaPalavrasExcluidas = ["id", "class"];
-
-    listaPalavrasExcluidas.forEach(palavra => {
-        var indice = palavra.indexOf("")
-    });
-}
-
 function RetornaColumns(classe){
     var saida = "";
 
+    var listaPalavrasExcluidas = ["Id", "Descricao"];
     var linhas = classe.split("\n");
+    
     for (let index = 0; index < linhas.length; index++) {
 
         var linha = linhas[index];
@@ -134,7 +127,12 @@ function RetornaColumns(classe){
             var nomePropriedade = linha.substr(indicePublic).split(" ")[2];
             var tipoPropriedade = linha.substr(indicePublic).split(" ")[1];
 
-            var larguraColuna = 60;
+            const naoEhPalavraComposta = !ehPropriedadeComposta(nomePropriedade);
+            const propriedadeNaoSeUsaNaGrid = sePropriedadeContemPalavra(nomePropriedade, listaPalavrasExcluidas);
+
+            if(propriedadeNaoSeUsaNaGrid && naoEhPalavraComposta)
+                continue;
+
             saida +=  geraColunaGrid(nomePropriedade, tipoPropriedade) + "\n" ;
         }
 

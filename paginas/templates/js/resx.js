@@ -30,8 +30,12 @@
     }
     
     function formataLinhaResx(propriedade){
+        var listaPalavrasLabelIgnorados = ["Codigo" , "Id"];
         var propriedadeComEspacos = AdicionarEspacos(propriedade);
     
+        if(sePropriedadeContemPalavra(propriedadeComEspacos, listaPalavrasLabelIgnorados))
+            return "";
+
         var propriedadeEmArray = propriedadeComEspacos.split(" ");
         var listaPalavrasIgnoradas = ["id", "viewmodel", "view", "model", "Codigo"];
     
@@ -51,6 +55,10 @@
                 }
                 
             }
+        }
+
+        if(ehPropriedadeComposta(propriedadeComEspacos)){
+            propriedadeComEspacos =  normalizaNomePropriedade(propriedadeComEspacos);
         }
     
         return `label${propriedade}	${propriedadeComEspacos}	
