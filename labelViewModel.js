@@ -23,8 +23,54 @@ function retornaCaminhoDataType(tipoVariavel){
 }
 
 function formataAnnotation(solutionName,areaName, controllerName, propertyName){
+
+    const propDescricaoDeCodigo = propertyName.indexOf("Descricao") != -1;
+    const propCodigo = propertyName.indexOf("Codigo") != -1;
+
+    var codigo = "";
+    if(propDescricaoDeCodigo){
+        return "";
+    }else if(propCodigo){
+        propertyName = propertyName.replace("Codigo", "");
+        codigo = "Descricao";
+    }
+
     return `\n      [Display(ResourceType = typeof(Universal.Tois.${solutionName}.Web.App_GlobalResources.${areaName}.${controllerName}),
-        Name = nameof(Universal.Tois.${solutionName}.Web.App_GlobalResources.${areaName}.${controllerName}.label${propertyName}))]`
+        Name = nameof(Universal.Tois.${solutionName}.Web.App_GlobalResources.${areaName}.${controllerName}.label${propertyName}${codigo}))]`
+}
+
+function adicionaKendoTemplate(tipoPropriedade, nomePropriedade){
+
+    const ehPropriedadeDescricaoDeCodigo = nomePropriedade.indexOf("Descricao") != -1;
+    if(ehPropriedadeDescricaoDeCodigo){
+        return "";
+    }
+
+    var templateProp = "String";
+
+    switch(tipoPropriedade){
+
+        case "DateTime":
+            templateProp = "DateTime";
+            break;
+        case "DateTime?":
+            templateProp = "DateTime";
+            break;
+        case "int?":
+            templateProp = `${nomePropriedade}ComboBox`;
+            break;
+        case "string":
+            templateProp = "String";
+            break;
+        case "decimal":
+            templateProp = "Decimal_6_2";
+            break;
+        case "int":
+            templateProp = "Integer";
+            break;
+    }
+
+    return `        [UIHint(@"Kendo\\${templateProp}")]\n`;
 }
 
 function ignorarLinhaCasoConterPalavrasChave(linha){
@@ -144,10 +190,12 @@ function retornaPropriedadeComDataAnotation(classe){
             }
 
             var nomePropriedade = linha.substr(indicePublic).split(" ")[2];
+            var tipoPropriedade = linha.substr(indicePublic).split(" ")[1];
             listaPropriedades.push(nomePropriedade);
 
             if(!contemPalavrasIndesejadas(nomePropriedade)){
                 saida +=  formataAnnotation(nomeSolucao, nomeArea, nomeController, nomePropriedade) + "\n" ;
+                saida += adicionaKendoTemplate(tipoPropriedade, nomePropriedade);
             }else{
                 saida += "\n";
             }
@@ -156,7 +204,6 @@ function retornaPropriedadeComDataAnotation(classe){
 
         if(index == linhas.length -2){
             saida += gerarExplictCast(nomeClasse, listaPropriedades);
-            saida += "\n\n";
             saida += gerarExplictCastTO(nomeClasse, listaPropriedades);
         }
         saida += linha;

@@ -56,12 +56,12 @@ function CriarGrid(){
     })
     ).Events( ev =>
     {
-        ev.DetailInit("Events.detailInitInner${nomeReduzidoClasse}Grid");
+        ev.DetailInit("Events.detailInit${nomeReduzidoClasse}Grid");
     })
     )
 
 <script>
-    Variables.detailInitInner${nomeReduzidoClasse}Grid = '@Url.Action("${nomeReduzidoClasse}InnerTabStripDetailInit", CONTROLLER_NAME, AREA)';
+    Variables.detailInit${nomeReduzidoClasse}Grid = '@Url.Action("${nomeReduzidoClasse}DetailInit", CONTROLLER_NAME, AREA)';
 </script>
     `;
     saida.innerHTML = grid;
@@ -90,6 +90,7 @@ function geraColunaGrid(nomePropriedade, tipoPropriedade, largura = "percentualL
         saida += `.Format("{0:G}")`;
     }else if(tipoPropriedade == "int?"){
         estiloColuna = estiloColunaCentralizada;
+        saida += `.ClientTemplate("#=${nomePropriedade.replace("Codigo", "")}Descricao#")`
     }
 
 

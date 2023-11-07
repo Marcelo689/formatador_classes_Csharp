@@ -33,7 +33,7 @@
         var propriedadeComEspacos = AdicionarEspacos(propriedade);
     
         var propriedadeEmArray = propriedadeComEspacos.split(" ");
-        var listaPalavrasIgnoradas = ["id", "viewmodel", "view", "model"];
+        var listaPalavrasIgnoradas = ["id", "viewmodel", "view", "model", "Codigo"];
     
         if(contemUmItemDaListaNaListaProcurada(listaPalavrasIgnoradas, propriedadeEmArray)){
     
@@ -60,7 +60,7 @@
     function leiaCaracteres(classe){
         var resourcesNames = [];
     
-        var listaPalavrasExcluidas = ["id", "class"];
+        var listaPalavrasExcluidas = ["id", "class", "codigo"];
     
         var linhas = classe.split("\n");
         for (let index = 0; index < linhas.length; index++) {
