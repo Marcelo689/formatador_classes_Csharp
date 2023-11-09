@@ -73,7 +73,8 @@ function geraColunaGrid(nomePropriedade, tipoPropriedade, largura = "percentualL
 
     //var biblioteca = ["int", "DateTime", "int?", "decimal", "string", "static"];
     var estiloColunaCentralizada = "estiloColunaCentralizada";
-    console.log(tipoPropriedade);
+    var estiloColunaInteira = "estiloColunaInteira";
+    var estiloColunaString = "estiloColunaString"
     var saida = `\n          cols.Bound(c => c.${nomePropriedade})`;
     var estiloColuna = estiloColunaCentralizada;
 
@@ -81,10 +82,14 @@ function geraColunaGrid(nomePropriedade, tipoPropriedade, largura = "percentualL
         return "";
     }
 
+    if(tipoPropriedade == "decimal" || tipoPropriedade == "decimal?"){
+        estiloColuna = estiloColunaInteira;
+        saida += `.Format("{0:n2}")`;
+    }else
     if(tipoPropriedade == "string"){
-        estiloColuna = "estiloColunaString";
+        estiloColuna = estiloColunaString;
     }else if(tipoPropriedade == "int"){
-        estiloColuna = "estiloColunaInteira";
+        estiloColuna =  estiloColunaInteira;
     }else if(tipoPropriedade == "DateTime"){
         estiloColuna = estiloColunaCentralizada;
         saida += `.Format("{0:G}")`;
@@ -92,7 +97,6 @@ function geraColunaGrid(nomePropriedade, tipoPropriedade, largura = "percentualL
         estiloColuna = estiloColunaCentralizada;
         saida += `.ClientTemplate("#=${nomePropriedade.replace("Codigo", "")}Descricao#")`
     }
-
 
     saida += `
                         .Width(${largura})
@@ -127,10 +131,14 @@ function RetornaColumns(classe){
             var nomePropriedade = linha.substr(indicePublic).split(" ")[2];
             var tipoPropriedade = linha.substr(indicePublic).split(" ")[1];
 
-            const naoEhPalavraComposta = !ehPropriedadeComposta(nomePropriedade);
+            const ehPalavraComposta = ehPropriedadeComposta(nomePropriedade);
             const propriedadeNaoSeUsaNaGrid = sePropriedadeContemPalavra(nomePropriedade, listaPalavrasExcluidas);
 
-            if(propriedadeNaoSeUsaNaGrid && naoEhPalavraComposta)
+            if(propriedadeNaoSeUsaNaGrid)
+                continue;
+
+            const contemPalavraDescricao = nomePropriedade.indexOf("Descricao") != -1;
+            if(ehPalavraComposta && contemPalavraDescricao)
                 continue;
 
             saida +=  geraColunaGrid(nomePropriedade, tipoPropriedade) + "\n" ;

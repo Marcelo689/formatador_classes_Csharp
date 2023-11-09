@@ -209,6 +209,7 @@ function retornaPropriedadeComDataAnotation(classe){
         }
 
         if(index == linhas.length -2){
+            nomeClasse = normalizaClassTOViewModel(nomeClasse);
             saida += gerarExplictCast(nomeClasse, listaPropriedades);
             saida += gerarExplictCastTO(nomeClasse, listaPropriedades);
         }
@@ -219,7 +220,7 @@ function retornaPropriedadeComDataAnotation(classe){
 }
 
 function gerarExplictCast(nomeClasse, listaPropriedades){
-    var explicitoCast =  `\n        public static explicit operator ${nomeClasse}ViewModel(${nomeClasse.replace("ViewModel","")}TO to)
+    var explicitoCast =  `\n        public static explicit operator ${nomeClasse}ViewModel(${nomeClasse}TO to)
         {
             return new ${nomeClasse}ViewModel{\n`;
     var propriedadesCast = "";
