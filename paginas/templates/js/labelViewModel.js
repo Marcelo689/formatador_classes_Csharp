@@ -42,6 +42,8 @@ function formataAnnotation(solutionName,areaName, controllerName, propertyName){
 function adicionaKendoTemplate(tipoPropriedade, nomePropriedade){
 
     const ehPropriedadeDescricaoDeCodigo = nomePropriedade.indexOf("Descricao") != -1;
+    const ehSnPropopriedade = ehSnProp(nomePropriedade)
+
     if(ehPropriedadeDescricaoDeCodigo){
         return "";
     }
@@ -60,7 +62,11 @@ function adicionaKendoTemplate(tipoPropriedade, nomePropriedade){
             templateProp = `${normalizaNomePropriedade(nomePropriedade)}ComboBox`;
             break;
         case "string":
-            templateProp = "String";
+            if(ehSnPropopriedade){
+                templateProp = "SNDropDown";
+            }else{
+                templateProp = "String";
+            }
             break;
         case "decimal":
             templateProp = "Decimal_6_2";
@@ -97,7 +103,7 @@ function contemNaLista(palavra, lista){
                 return true;            
         }else
 
-        if(palavra.toLowerCase().indexOf(item.toLowerCase()) != -1){
+        if(palavra.indexOf(item) != -1){
             return true;
         }
     }
@@ -141,7 +147,7 @@ function retornaPropriedadeComDataAnotation(classe){
     var nomeClasse = dados.ClassePrincipal;
 
     var saida = `using System.ComponentModel.DataAnnotations;
-    using Universal.Tois.${nomeSolucao}.Dto.${normalizaClasseNameFilter(nomeClasse)};\n`;
+    using Universal.Tois.${nomeSolucao}.Dto.${nomeController};\n`;
     var explicitOperador = "public static explicit operator";
 
     var indiceUltimo = encontraIndiceUltimoCaractere(classe);
@@ -177,6 +183,13 @@ function retornaPropriedadeComDataAnotation(classe){
         }
         var contemPublic = linha.indexOf("public") != -1;
 
+        const contemNamespace = linha.indexOf("namespace") != -1;
+        if(contemNamespace){
+            var novoNameSpace = `\nnamespace Universal.Tois.${nomeSolucao}.Web.Areas.${nomeArea}.Models.${nomeController}`;
+            dados.setNamespace(novoNameSpace);
+            linha = linha.replace(linha, novoNameSpace);
+        }
+
         if(contemPublic){
             var indicePublic = linha.indexOf("public");
             var contemClass = linha.indexOf("class") != -1;
@@ -188,6 +201,8 @@ function retornaPropriedadeComDataAnotation(classe){
 
                 if(existeBracket){
                     linha = linha.replace("{", "ViewModel{")
+                }else{
+                    linha += "ViewModel";
                 }
 
                 nomeClasse = linha.trimLeft().split(" ")[2].replace("{","");

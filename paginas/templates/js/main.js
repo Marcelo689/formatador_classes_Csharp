@@ -37,6 +37,10 @@ function apagaPalavrasNaLista(palavra, lista){
     return palavra;
 }
 
+function ehSnProp(nomeProp){
+    return nomeProp.indexOf("Sn") != -1;
+}
+
 function exibeMensagemCentralizada(){
     var corpo = document.getElementsByTagName('body')[0];
 
@@ -100,11 +104,16 @@ function Dados(Area,Solution,ControllerName, ClassePrincipal){
     this.Solution = Solution;
     this.ControllerName = ControllerName;
     this.ClassePrincipal = ClassePrincipal;
-
+    this.Namespace;
     Dados.prototype.Area = () => Area;
     Dados.prototype.Solution = () => Solution;
     Dados.prototype.ControllerName = () => ControllerName;
     Dados.prototype.ClassePrincipal = () => ClassePrincipal;
+    Dados.prototype.Namespace = () => this.Namespace;
+
+    Dados.prototype.setNamespace = (namespace) => {
+        this.Namespace = namespace;
+    }
 
     Dados.prototype.PreencheCamposDefault = function() {
         var contadorCamposValidos = 0;

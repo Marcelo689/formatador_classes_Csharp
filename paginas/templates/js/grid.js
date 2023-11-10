@@ -1,5 +1,6 @@
 var classe = document.getElementById("entrada");
 
+var numeroColunasTotal = 0;
 
 function CriarGrid(){
     var classeCompleta     = entrada.value;   
@@ -24,32 +25,27 @@ function CriarGrid(){
 
         var tamanhoPaginaInicial = 10;
 
-        int numeroColunas = 10;
+        int numeroColunas = DigiteONumeroDeColunas;
         var larguraPorColuna = 100 / numeroColunas;
         var percentualLargura = larguraPorColuna.ToString() + "%";
     }
 
     @(Html.Kendo().Grid<${nomeReduzidoClasse}ViewModel>()
         .Name(GRID_NAME)
+        .HtmlAttributes( new { @class = "gridStyle"})
         .Pageable(pageable => pageable.
         PageSizes( new int[]{ tamanhoPaginaInicial, tamanhoPaginaInicial *2 , tamanhoPaginaInicial * 3})
         )
     .Columns(cols =>
     {`;
-    var colunas = RetornaColumns(classeCompleta);
-    grid += colunas;
-    grid += `\n         //cols.Command(command =>
-                        //{
-        //command.Edit();
-        //command.Destroy();
-    //}).Width(200);
-   
+    grid = RetornaColumns(classeCompleta, grid);
+    grid += `\n         
     })
     .DataSource(dataSource => dataSource
     .Ajax()
     .Model( e => e.Id( f => f.Id))
     .PageSize(tamanhoPaginaInicial)
-    .Read(read => read.Action("Read${controllerName}", CONTROLLER_NAME, AREA).Data("Functions.getParamsRead${nomeReduzidoClasse}(this, "+Model+")"))
+    .Read(read => read.Action("Read${nomeReduzidoClasse}", CONTROLLER_NAME, AREA).Data("Functions.getParamsRead${nomeReduzidoClasse}(this, "+Model+")"))
     .Events( ev => {
         ev.RequestStart("OpenLoadingWindow");
         ev.RequestEnd("CloseLoadingWindow");
@@ -61,7 +57,7 @@ function CriarGrid(){
     )
 
 <script>
-    Variables.detailInit${nomeReduzidoClasse}Grid = '@Url.Action("${nomeReduzidoClasse}DetailInit", CONTROLLER_NAME, AREA)';
+    Variables.urlDetailInit${nomeReduzidoClasse}Grid = '@Url.Action("${nomeReduzidoClasse}DetailInit", CONTROLLER_NAME, AREA)';
 </script>
     `;
     saida.innerHTML = grid;
@@ -76,6 +72,11 @@ function geraColunaGrid(nomePropriedade, tipoPropriedade, largura = "percentualL
     var estiloColunaInteira = "estiloColunaInteira";
     var estiloColunaString = "estiloColunaString"
     var saida = `\n          cols.Bound(c => c.${nomePropriedade})`;
+
+    if(ehSnProp(nomePropriedade)){
+        saida = `\n          cols.ForeignKey(c => c.${nomePropriedade}, (System.Collections.IEnumerable)this.ViewData["SNDataSource"], "Value", "Text")`;
+    }
+
     var estiloColuna = estiloColunaCentralizada;
 
     if(tipoPropriedade == "static"){
@@ -100,15 +101,17 @@ function geraColunaGrid(nomePropriedade, tipoPropriedade, largura = "percentualL
 
     saida += `
                         .Width(${largura})
-                        .Editable("Functions.naoEditavel")
                         .HeaderHtmlAttributes(${estiloColuna})
                         .HtmlAttributes(${estiloColuna});`;
 
+                        numeroColunasTotal++;
     return saida;
 }
 
-function RetornaColumns(classe){
+function RetornaColumns(classe, grid){
     var saida = "";
+
+    numeroColunasTotal = 0;
 
     var listaPalavrasExcluidas = ["Id", "Descricao"];
     var linhas = classe.split("\n");
@@ -146,7 +149,9 @@ function RetornaColumns(classe){
 
     }
     
-    return saida;
+    grid = grid.replace("DigiteONumeroDeColunas", numeroColunasTotal);
+    grid += saida;
+    return grid;
 }
 
 function RetornaColunasGrid(){
