@@ -30,6 +30,16 @@ function CriarGrid(){
         var percentualLargura = larguraPorColuna.ToString() + "%";
     }
 
+    <style>
+        .k-grid .k-grid-header .k-header .k-link {
+            height: auto;
+        }
+
+        .k-grid .k-grid-header .k-header {
+            white-space: normal;
+        }
+    </style>
+
     @(Html.Kendo().Grid<${nomeReduzidoClasse}ViewModel>()
         .Name(GRID_NAME)
         .HtmlAttributes( new { @class = "gridStyle"})

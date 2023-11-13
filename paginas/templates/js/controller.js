@@ -241,12 +241,13 @@ function gerarRead(controllerName, classeName){
 
             ValidationResult<PagingResult<${classeName}ViewModel>> validationResultViewModel = new ValidationResult<PagingResult<${classeName}ViewModel>>();
             validationResultViewModel.Result = new PagingResult<${classeName}ViewModel>();
+            validationResultViewModel.Result.DataSource = new List<${classeName}ViewModel>();
             ValidationResult<PagingResult<${classeName}TO>> validationPaging${classeName}TO = i${controllerName}AppService.GetLista${classeName}(filtrosTO);
-            IEnumerable<${classeName}TO> lista${classeName}TO = validationPaging${classeName}TO.Result.DataSource;
-
+            
             bool sucessoAoBuscarDados = validationPaging${classeName}TO.IsValid;
             if (sucessoAoBuscarDados)
             {
+                IEnumerable<${classeName}TO> lista${classeName}TO = validationPaging${classeName}TO.Result.DataSource;
                 bool listaPreenchida = lista${classeName}TO != null;
                 if (listaPreenchida)
                 {
