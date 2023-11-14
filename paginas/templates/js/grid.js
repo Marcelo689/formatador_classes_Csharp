@@ -14,8 +14,11 @@ function CriarGrid(){
 
    var grid =  `
     @using Universal.Tois.${dados.Solution}.Web.Areas.${dados.Area}.Models.${dados.ControllerName}
+    @using Universal.Tois.${dados.Solution}.Web.App_GlobalResources.${dados.Area};
     @model int
     @{
+        ViewBag.Title = ${dados.ControllerName}.labelTitle;
+        this.ViewBag.Message = ${dados.ControllerName}.labelTitle;
         const string CONTROLLER_NAME = "${controllerName}";
         string GRID_NAME = CONTROLLER_NAME + "Grid" + Model.ToString();
         object AREA = "${areaName}";

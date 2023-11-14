@@ -71,6 +71,14 @@
         var listaPalavrasExcluidas = ["id", "class", "codigo"];
     
         var linhas = classe.split("\n");
+
+        var dados = getNamespace(classe);
+        dados.PreencheCamposDefault();
+
+        var labelTitle = formataLinhaResx(dados.ControllerName);
+        labelTitle = labelTitle.replace(dados.ControllerName, "Title");
+        resourcesNames.push(labelTitle);
+        
         for (let index = 0; index < linhas.length; index++) {
     
             var linha = linhas[index];

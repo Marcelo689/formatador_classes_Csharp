@@ -72,14 +72,45 @@ function gerarMetodosValidar(listaPropriedades, dados){
     return saida;
 }
 
+function gerarValidationResx(labelMensagem, mensagem){
+    return `${labelMensagem}	${mensagem}\n`;
+}
+
+function adicionarResourceObrigatorio(propriedadeFullName, listaPropriedadesJaUsadas, listaResources){
+    var existe = listaPropriedadesJaUsadas.includes(propriedadeFullName);
+
+    if(existe)
+        return;
+    else{
+        listaResources.push(gerarValidationResx(`msgCampo${propriedadeFullName}Obrigatorio`, `O campo ${AdicionarEspacos(propriedadeFullName)} é obrigatório.`));
+        listaPropriedadesJaUsadas.push(propriedadeFullName);
+    }
+}
+
+function adicionarResourceTamanhoMaximo(propriedadeFullName, listaPropriedadesJaUsadasTamanhoMaximo, listaResources, numeroLetras){
+    var existe = listaPropriedadesJaUsadasTamanhoMaximo.includes(propriedadeFullName);
+
+    if(existe)
+        return;
+    else{
+        listaResources.push(gerarValidationResx(`msgCampo${propriedadeFullName}TamanhoMaximo`, `O campo ${AdicionarEspacos(propriedadeFullName)} não pode exceder ${numeroLetras} caracteres.`));
+        listaPropriedadesJaUsadasTamanhoMaximo.push(propriedadeFullName);
+    }
+}
+
 function gerarValidacaoModel(listaPropriedades, nomeClassePrincipal, areaName, controllerName){
 
     var saida = `private void ValidarModel(${nomeClassePrincipal}ViewModel viewmodel){\n`;
-
+    var tamanhoMaximoString  = 50;
     var tipo = new Tipo();
+    var listaPropriedadesJaUsadas = [];
+    var listaPropriedadesJaUsadasTamanhoMaximo = [];
+    var resourcesLabels = [];
 
     for (let indice = 0; indice < listaPropriedades.length; indice++) {
         const propriedade = listaPropriedades[indice];
+
+        var propriedadeNormalizada = normalizaNomePropriedade(propriedade.nome);
 
         switch (propriedade.tipo) {
             case tipo.string:
@@ -88,30 +119,32 @@ function gerarValidacaoModel(listaPropriedades, nomeClassePrincipal, areaName, c
                 saida += `
             ValidaStringDoViewModel(
                 texto: viewmodel.${propriedade.nome},
-                mensagemEhNulo: App_GlobalResources.${areaName}.${controllerName}.msgCampo${propriedade.nome}Obrigatorio,
-                tamanhoMaximo: 50,
-                mensagemTamanhoMaximo: App_GlobalResources.${areaName}.${controllerName}.msgCampo${propriedade.nome}TamanhoMaximo
+                mensagemEhNulo: App_GlobalResources.${areaName}.${controllerName}.msgCampo${propriedadeNormalizada}Obrigatorio,
+                tamanhoMaximo: ${tamanhoMaximoString},
+                mensagemTamanhoMaximo: App_GlobalResources.${areaName}.${controllerName}.msgCampo${propriedadeNormalizada}TamanhoMaximo
             );\n`;
-
+            adicionarResourceObrigatorio(propriedadeNormalizada, listaPropriedadesJaUsadas, resourcesLabels);
+            adicionarResourceTamanhoMaximo(propriedadeNormalizada, listaPropriedadesJaUsadasTamanhoMaximo, resourcesLabels, tamanhoMaximoString);
                 break;
             case tipo.intNullAble:
 
                 saida += "\n";
                 saida += `
             ValidaIntNullableLookUpObrigatorioViewModel(
-                numeroNullAble: viewModel.${propriedade.nome},
-                mensagemObrigatorio: App_GlobalResources.${areaName}.${controllerName}.msgCampo${propriedade.nome}Obrigatorio
+                numeroNullAble: viewmodel.${propriedade.nome},
+                mensagemObrigatorio: App_GlobalResources.${areaName}.${controllerName}.msgCampo${propriedadeNormalizada}Obrigatorio
             );\n`;
 
+            adicionarResourceObrigatorio(propriedadeNormalizada, listaPropriedadesJaUsadas, resourcesLabels)
                 break;
             // case tipo.decimalNullAble:
 
             //     saida += "\n";
             //     saida += `
             //     ValidaDecimalMinMax(
-            //         min: viewModel.PrecoMinimo,
-            //         max: viewModel.PrecoMaximo,
-            //         mensagemValorMinMaior: App_GlobalResources.Cadastros.CadastrarPoliticaNegociacaoCompra.msgPrecoMinMaior
+            //         min: viewmodel.PrecoMinimo,
+            //         max: viewmodel.PrecoMaximo,
+            //         mensagemValorMinMaior: App_GlobalResources.${areaName}.${controllerName}.msgPrecoMinMaior
             //     );\n`;
 
             //     break;
@@ -119,6 +152,8 @@ function gerarValidacaoModel(listaPropriedades, nomeClassePrincipal, areaName, c
                 break;
         }
     }
+
+    resourcesLabels.forEach( resource => saida += resource);
     saida += "      }\n";
 
     return saida;
