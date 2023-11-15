@@ -9,6 +9,8 @@ namespace Universal.Fabrica.Web.Areas.Operacoes.Models.CadastrarTemplate{
         public float Altura {get;set;}
         public int? TipoBananaCodigo {get;set;}
         public string TipoBananaDescricao {get;set;}
+        public int? TipoChocolateId {get;set;}
+        public string TipoChocolateDescricao {get;set;}
     }
 }
 
