@@ -17,6 +17,34 @@ document.addEventListener("DOMContentLoaded", function (e){
     });
 })
 
+function getListProps(classe){
+
+    var listaProps = [];
+
+    var linhasClasse = classe.split("\n");
+
+    for(var indice =0 ; indice < linhasClasse.length; indice++){
+        var linha = linhasClasse[indice];
+        var linha = linha.trimLeft();
+
+        var naoContemPublic = linha.indexOf("public") == -1;
+        var contemClass = linha.indexOf("class") != -1;
+
+        if(naoContemPublic || contemClass){
+            continue;
+        }else{
+
+            var propType = linha.split(" ")[1];
+            var propName = linha.split(" ")[2];
+
+            var itemProp = new Propriedade(propType, propName);
+
+            listaProps.push(itemProp);
+        }
+    }
+
+    return listaProps;
+}
 
 function normalizaNomePropriedade(palavra){
     var lista = ["Codigo","Descricao"];
@@ -218,6 +246,7 @@ function getNamespace(classe){
  
 function Tipo(tipo, nome){
     this.decimalNullAble = "decimal?";
+    this.decimal = "decimal";
     this.intNullAble = "int?";
     this.string = "string";
     this.int = "int";
@@ -234,18 +263,38 @@ function Tipo(tipo, nome){
     Tipo.prototype.datetimeNullable = () => this.datetimeNullable;
 }
 
+function TipoTS(){
+    this.decimalNullAble = "number";
+    this.decimal = "number"
+    this.intNullAble = "number";
+    this.string = "string";
+    this.int = "number";
+    this.bool = "boolean";
+    this.datetime = "Date"; 
+    this.datetimeNullable = "Date";
+    
+    Tipo.prototype.decimalNullAble = () => this.decimalNullAble;
+    Tipo.prototype.decimal = () => this.decimal;
+    Tipo.prototype.intNullAble = () => this.intNullAble;
+    Tipo.prototype.string = () => this.string;
+    Tipo.prototype.int = () => this.int;
+    Tipo.prototype.bool = () => this.bool;
+    Tipo.prototype.datetime = () => this.datetime;
+    Tipo.prototype.datetimeNullable = () => this.datetimeNullable;
+}
+
 var TiposCSharp = {
-decimalNullAble : "decimal?",
-intNullAble : "int?",
-string : "string",
-int : "int",
-bool: "bool",
+    decimalNullAble : "decimal?",
+    intNullAble : "int?",
+    string : "string",
+    int : "int",
+    bool: "bool",
 }
 
 function Propriedade(tipo, nome){
-this.tipo = tipo;
-this.nome = nome;
+    this.tipo = tipo;
+    this.nome = nome;
 
-Propriedade.prototype.Tipo = () => this.tipo;
-Propriedade.prototype.Nome = () => this.nome;
+    Propriedade.prototype.Tipo = () => this.tipo;
+    Propriedade.prototype.Nome = () => this.nome;
 }

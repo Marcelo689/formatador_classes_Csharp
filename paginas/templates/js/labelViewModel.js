@@ -71,6 +71,9 @@ function adicionaKendoTemplate(tipoPropriedade, nomePropriedade){
         case "decimal":
             templateProp = "Decimal_6_2";
             break;
+        case "decimal?":
+            templateProp = "Decimal_6_2";
+            break;
         case "int":
             templateProp = "Integer";
             break;

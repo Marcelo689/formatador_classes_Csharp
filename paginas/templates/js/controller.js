@@ -187,34 +187,7 @@ function gerarArquivoController(){
     copiaAposFormatado();
 }
 
-function getListProps(classe){
 
-    var listaProps = [];
-
-    var linhasClasse = classe.split("\n");
-
-    for(var indice =0 ; indice < linhasClasse.length; indice++){
-        var linha = linhasClasse[indice];
-        var linha = linha.trimLeft();
-
-        var naoContemPublic = linha.indexOf("public") == -1;
-        var contemClass = linha.indexOf("class") != -1;
-
-        if(naoContemPublic || contemClass){
-            continue;
-        }else{
-
-            var propType = linha.split(" ")[1];
-            var propName = linha.split(" ")[2];
-
-            var itemProp = new Propriedade(propType, propName);
-
-            listaProps.push(itemProp);
-        }
-    }
-
-    return listaProps;
-}
 
 function geraNamespace(solutionName, areaName, controllerName){
     var texto = `
