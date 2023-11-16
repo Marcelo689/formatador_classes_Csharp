@@ -28,7 +28,15 @@
         }
         return "";
     }
-    
+
+    function ehPropriedadePercentual(propriedadeComEspacos){
+        return propriedadeComEspacos.indexOf("Percentual") != -1;
+    }
+
+    function formatarPercentualResx(propriedadeComEspacos){
+        return propriedadeComEspacos.replace("Percentual", "%");
+    }
+
     function formataLinhaResx(propriedade){
         var listaPalavrasLabelIgnorados = ["Codigo" , "Id"];
         var propriedadeComEspacos = AdicionarEspacos(propriedade);
@@ -60,7 +68,11 @@
         if(ehPropriedadeComposta(propriedadeComEspacos)){
             propriedadeComEspacos =  normalizaNomePropriedade(propriedadeComEspacos);
         }
-    
+        
+        if(ehPropriedadePercentual(propriedadeComEspacos)){
+            propriedadeComEspacos = formatarPercentualResx(propriedadeComEspacos);
+        }
+
         return `label${propriedade}	${propriedadeComEspacos}	
     `;
     }

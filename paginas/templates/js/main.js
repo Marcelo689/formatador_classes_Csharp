@@ -36,7 +36,10 @@ function getListProps(classe){
 
             var propType = linha.split(" ")[1];
             var propName = linha.split(" ")[2];
-
+            
+            if(contemPalavrasInvalidas(propName)){
+                continue;
+            }
             var itemProp = new Propriedade(propType, propName);
 
             listaProps.push(itemProp);
@@ -44,6 +47,27 @@ function getListProps(classe){
     }
 
     return listaProps;
+}
+
+function ehPropriedadeComboBox(propriedadeNome){
+
+    var contemCodigo = propriedadeNome.indexOf("Codigo") != -1;
+    var contemDescricao = propriedadeNome.indexOf("Descricao") != -1;
+
+    return contemCodigo || contemDescricao;
+}
+
+function contemPalavrasInvalidas(nomePropriedade){
+    var listaPalavrasInvalidas = ["explicit"];
+
+    for (const palavraInvalida of listaPalavrasInvalidas) {
+        
+        const contem = nomePropriedade.indexOf(palavraInvalida) != -1;
+        if(contem){
+            return true;
+        }
+    }
+    return false;
 }
 
 function normalizaNomePropriedade(palavra){
@@ -127,6 +151,13 @@ function validField(field){
     return field.value != undefined && field.value.length != "";
 }
 
+function contemDescricao(propriedadeNome){
+    return propriedadeNome.indexOf("Descricao") != -1;
+}
+
+function replaceDescricaoPorCodigo(propriedadeNome){
+    return propriedadeNome.replace("Descricao", "Codigo");
+}
 function Dados(Area,Solution,ControllerName, ClassePrincipal){
     this.Area = Area;
     this.Solution = Solution;

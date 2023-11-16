@@ -45,6 +45,8 @@ function CriarGrid(){
 
     @(Html.Kendo().Grid<${nomeReduzidoClasse}ViewModel>()
         .Name(GRID_NAME)
+        .Editable()
+        .ToolBar(e => e.Create())
         .HtmlAttributes( new { @class = "gridStyle"})
         .Pageable(pageable => pageable.
         PageSizes( new int[]{ tamanhoPaginaInicial, tamanhoPaginaInicial *2 , tamanhoPaginaInicial * 3})
@@ -52,19 +54,24 @@ function CriarGrid(){
     .Columns(cols =>
     {`;
     grid = RetornaColumns(classeCompleta, grid);
-    grid += `\n         
+    grid += `\n
+        cols.Command(cmd => cmd.Edit());
+
     })
     .DataSource(dataSource => dataSource
     .Ajax()
     .Model( e => e.Id( f => f.Id))
     .PageSize(tamanhoPaginaInicial)
     .Read(read => read.Action("Read${nomeReduzidoClasse}", CONTROLLER_NAME, AREA).Data("Functions.getParamsRead${nomeReduzidoClasse}(this, "+Model+")"))
+    .Create(c => c.Action("Insert${nomeReduzidoClasse}", CONTROLLER_NAME, AREA))
+    .Update( c => c.Action("Update${nomeReduzidoClasse}", CONTROLLER_NAME, AREA))
     .Events( ev => {
         ev.RequestStart("OpenLoadingWindow");
         ev.RequestEnd("CloseLoadingWindow");
     })
     ).Events( ev =>
     {
+        ev.Save("Events.onSave${nomeReduzidoClasse}");
         ev.DetailInit("Events.detailInit${nomeReduzidoClasse}Grid");
     })
     )

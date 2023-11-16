@@ -1,15 +1,22 @@
 function gerarTsController(){
+
+    var dados = getNamespace(entrada.value);
+    dados.PreencheCamposDefault();
     var output = "";
     var listaPropriedades = getListProps(entrada.value);
 
-    var nomeClasse = `class ControleRegulagemLinhaDestala {\n`;
+    var nomeClasse = `
+    
+    module Universal.Tois.${dados.Solution}.Web.Scripts.${dados.ControllerName}{
+        class ${dados.ClassePrincipal} {\n`;
 
     output += nomeClasse;
     
     listaPropriedades.forEach( propriedade => output += retornaTsProp(propriedade.nome, propriedade.tipo));
 
-    output += "}\n";
+    output += "     }";
     saida.innerHTML = output;
+    saida.innerHTML += gerarClasseIndexController(listaPropriedades, dados.ClassePrincipal, dados.ControllerName)
     copiaAposFormatado();
 }
 
@@ -47,25 +54,50 @@ function retornaTsProp(propriedadeNome, propriedadeTipo){
             break;
     }
 
-    return `    public ${propriedadeNome}: ${descricao};\n`;
+    return `            public ${propriedadeNome}: ${descricao};\n`;
 
 }
 
+function gerarClassePropriedadesInstancia(listaPropriedades){
 
-function gerarClasseIndexController(){
-    var headerClasse = ` class IndexController {
-        public getParamsUpdate${controllerName}(e: any) {
+    var saida = "";
+    listaPropriedades.forEach( propriedade => {
+        saida += `
+                e.model.${propriedade.nome} = `;
+
+        if(ehPropriedadeComboBox(propriedade.nome)){
+            if(contemDescricao(propriedade.nome)){
+                saida += `kendo.Util.Combo.getText("${replaceDescricaoPorCodigo(propriedade.nome)}");`
+            }else{
+                saida += `kendo.Util.Combo.getValue("${propriedade.nome}");`;
+            }
+        }else{
+            saida += `$("#${propriedade.nome}").val();`;
+        }
+        
+    });
+
+    return saida;
+}
+
+function gerarClasseIndexController(listaPropriedades, classeName, controllerName){
+
+    var indexController = ``;
+
+    var headerClasse = `
+    class IndexController {
     `;
 
-    var classeAndPropriedadesInstaciadas = `
-            var modelo = new ${classeName}();
-            modelo.${propriedadeNome} = $("#${propriedadeNome}").val();
-            
-            return modelo;
-        }
-        public getParamsInsert${controllerName}(e: any) {
-            
-        }
+    var onSave = `
+        public onSave${controllerName}(e: any) {
+            `;
+            onSave += gerarClassePropriedadesInstancia(listaPropriedades);
+
+            onSave +=
+            `
+        }`;
+        
+    var detailInit = `
         public detailInit${classeName}Grid(e: any) {
 
             var modelo : any = e.data;
@@ -80,6 +112,9 @@ function gerarClasseIndexController(){
             })
         }
 
+        `;
+        
+    var gridMethods = `
         public instanciarGrid(id: number) {
             this.grid = $("#${controllerName}" + id.toString()).data("kendoGrid");
         }
@@ -93,11 +128,22 @@ function gerarClasseIndexController(){
         }
 
     }
-
+    `;
+    
+    var EventsFunctions = `
     var controller = new IndexController();
 
     Functions.getParamsRead${controllerName} = (isso, id) => controller.getParamsRead${controllerName}(isso, id);
-    Functions.getParamsInsert${controllerName} = (e) => controller.getParamsInsert${controllerName}(e);
-    Functions.getParamsUpdate${controllerName} = (e) => controller.getParamsUpdate${controllerName}(e);
-    Events.detailInit${controllerName}Grid = (e) => controller.detailInit${controllerName}Grid(e);`
+    Events.onSave${controllerName} = (e) => controller.onSave${controllerName}(e);
+    Events.detailInit${controllerName}Grid = (e) => controller.detailInit${controllerName}Grid(e);
+    
+}`;
+    
+    indexController += headerClasse;
+    indexController += onSave;
+    indexController += detailInit;
+    indexController += gridMethods;
+    indexController += EventsFunctions;
+
+    return indexController;
 }
