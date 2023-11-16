@@ -128,7 +128,9 @@ function sePropriedadeContemPalavra(propriedade, listaPalavras){
 
     return contem;
 }
-
+function contemId(propriedadeNome){
+    return propriedadeNome.indexOf("Id") != -1;
+}
 function contarNumeroLetrasMaiusculas(nomePropriedade){
 
     var contador = 0;

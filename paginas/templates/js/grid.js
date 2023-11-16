@@ -133,7 +133,7 @@ function RetornaColumns(classe, grid){
 
     numeroColunasTotal = 0;
 
-    var listaPalavrasExcluidas = ["Id", "Descricao"];
+    var listaPalavrasExcluidas = ["Descricao"];
     var linhas = classe.split("\n");
     
     for (let index = 0; index < linhas.length; index++) {
@@ -164,7 +164,11 @@ function RetornaColumns(classe, grid){
             if(ehPalavraComposta && contemPalavraDescricao)
                 continue;
 
-            saida +=  geraColunaGrid(nomePropriedade, tipoPropriedade) + "\n" ;
+            if(contemId(nomePropriedade)){
+                saida += geraColunaGridHidden(nomePropriedade);
+            }else{
+                saida += geraColunaGrid(nomePropriedade, tipoPropriedade) + "\n" ;
+            }
         }
 
     }
@@ -173,6 +177,12 @@ function RetornaColumns(classe, grid){
     grid += saida;
     return grid;
 }
+
+function geraColunaGridHidden(nomePropriedade){
+    return `
+        cols.Bound(c => c.${nomePropriedade}).Hidden(true);\n`
+}
+
 
 function RetornaColunasGrid(){
     var entradaString = entrada.value;
