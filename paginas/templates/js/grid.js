@@ -72,6 +72,7 @@ function CriarGrid(){
     ).Events( ev =>
     {
         ev.Save("Events.onSave${nomeReduzidoClasse}");
+        ev.Error("Universal.ErrorHandling.error_handler.bind({ WidgetID: '" + GRID_NAME + "_" + this.Model + "'})");
         ev.DetailInit("Events.detailInit${nomeReduzidoClasse}Grid");
     })
     )
