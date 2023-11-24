@@ -54,16 +54,50 @@ function pegarApenasLabel(linha){
 function gerarSaida(lista){
     var output = "";
     for (const palavra of lista) {
+        var pegaTipoResxLabel = pegaTipoLabel(palavra);
         var propriedadeNome = pegaPropriedadeDoLabel(palavra);
-
         var palavraComEspacos = convertePalavraComEspacos(propriedadeNome);
-        var esseLabel = `label${propriedadeNome}    ${palavraComEspacos}\n`;
+        var esseLabel = `${pegaTipoResxLabel}${propriedadeNome}Obrigatorio	${palavraComEspacos}\n`;
 
         output += esseLabel;
     }
 
     return output;
 }
+
+function pegaTipoLabel(palavra){
+    
+   var saida = retornaPadraoLabel(palavra);
+
+   return removePonto(saida);
+}
+
+function retornaPadraoLabel(palavra){
+    var saida = retornaPadraoCasoConter(palavra, ".ask");
+
+    if(saida != ""){
+        return saida;
+    }
+
+    saida = retornaPadraoCasoConter(palavra, ".msg")
+
+    if(saida != ""){
+        return saida;
+    }
+    saida = retornaPadraoCasoConter(palavra, ".label");
+
+    return saida;
+}
+
+function retornaPadraoCasoConter(palavra, padrao){
+    
+    if(palavraContem(palavra, padrao)){
+        return padrao;
+    }
+
+    return "";
+}
+
 
 function pegaPropriedadeDoLabel(palavraLabel){
     var labelNormalizado = normalizaLabel(palavraLabel);
@@ -117,9 +151,14 @@ function ehMaiuscula(letra) {
 function normalizaLabel(palavraLabel){
     
     palavraLabel = removePonto(palavraLabel);
+    palavraLabel = removeVirgula(palavraLabel);
     palavraLabel = removePontoVirgula(palavraLabel);
     palavraLabel = removePadroes(palavraLabel);
     return palavraLabel = palavraLabel.replace(".", "");
+}
+
+function removeVirgula(palavraLabel){
+    return palavraLabel.replace(",", "");
 }
 
 function removePadroes(palavraLabel){
