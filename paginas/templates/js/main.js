@@ -107,6 +107,10 @@ function exibeMensagemCentralizada(){
 
 }
 
+function ehPropriedadeDescricaoComLabelProprio(propriedade){
+    return contemDescricao(propriedade) && ehPropriedadeComposta(propriedade);
+}
+
 function ehPropriedadeComposta(nomePropriedade){
 
     const propriedadeEhComposta = contarNumeroLetrasMaiusculas(nomePropriedade) > 1;

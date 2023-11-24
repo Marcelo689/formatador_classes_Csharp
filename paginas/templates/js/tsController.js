@@ -89,7 +89,7 @@ function gerarClasseIndexController(listaPropriedades, classeName, controllerNam
     `;
 
     var onSave = `
-        public onSave${controllerName}(e: any) {
+        public onSave${classeName}(e: any) {
             `;
             onSave += gerarClassePropriedadesInstancia(listaPropriedades);
 

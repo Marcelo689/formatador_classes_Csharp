@@ -109,6 +109,10 @@ function gerarValidacaoModel(listaPropriedades, nomeClassePrincipal, areaName, c
 
     for (let indice = 0; indice < listaPropriedades.length; indice++) {
         const propriedade = listaPropriedades[indice];
+        
+        if(ehPropriedadeDescricaoComLabelProprio(propriedade.nome)){
+            continue;
+        }
 
         var propriedadeNormalizada = normalizaNomePropriedade(propriedade.nome);
 
@@ -274,30 +278,41 @@ function gerarRead(controllerName, classeName){
     return texto;
 }
     
+function primeiraLetraMinuscula(nome){
+
+    nome[0] = nome[0].toLowerCase();
+    return nome;
+}
+
 function gerarInsert(controllerName, classeName){
+
+    var nomeClassVar = primeiraLetraMinuscula(classeName);
+
     var texto = `
-        public JsonResult Inserir${classeName}([DataSourceRequest] DataSourceRequest request, ${controllerName}ViewModel viewModel)
+    public JsonResult Insert${classeName}([DataSourceRequest] DataSourceRequest request, ${classeName}ViewModel viewmodel)
+    {
+        ValidarModel${classeName}(viewmodel);
+        var validationResultViewModel = new ValidationResult<${classeName}ViewModel>();
+
+        bool dadosValidos = ModelState.IsValid;
+        if (dadosValidos)
         {
-            ValidarModelTO(viewModel);
-            ${controllerName}TO to = (${controllerName}TO) viewModel;
+            Dto.${controllerName}.${classeName}TO ${nomeClassVar}TO = (Dto.${controllerName}.${classeName}TO) viewmodel;
+            ValidationResult validation${classeName}TO = i${controllerName}AppService.Insert${classeName}(${nomeClassVar}TO);
 
-            if (ModelState.IsValid)
+            bool sucessoAoInserir = validation${classeName}TO.IsValid;
+            if (sucessoAoInserir)
             {
-                ValidationResult validation = i${controllerName}AppService.Inserir${controllerName}(to);
-
-                bool fracassoAoInserir = !validation.IsValid;
-                if (fracassoAoInserir)
-                {
-                    validation.ValidationResultToModelState(this.ModelState);
-                }
-                else
-                {
-                    viewModel = (${controllerName}ViewModel) to;
-                }
+                validationResultViewModel.Result = (${classeName}ViewModel) ${nomeClassVar}TO;
             }
-
-            return Json(new[] { viewModel }.ToDataSourceResult(request, this.ModelState));
+            else
+            {
+                validation${classeName}TO.ValidationResultToModelState(ModelState);
+            }
         }
+
+        return Json(validationResultViewModel.ToDataSourceResult(request, ModelState), JsonRequestBehavior.AllowGet);
+    }
     `
 
     return texto;
