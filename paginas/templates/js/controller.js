@@ -183,6 +183,7 @@ function gerarArquivoController(){
     textoSaida += gerarControlador(controllerName);
     textoSaida += gerarRead(controllerName, classeName);
     textoSaida += gerarInsert(controllerName, classeName);
+    textoSaida += gerarUpdate(controllerName,classeName);
     textoSaida += gerarMetodosValidar(listaPropriedades, dados);
     textoSaida += fecharArquivo();
 
@@ -190,8 +191,6 @@ function gerarArquivoController(){
     
     copiaAposFormatado();
 }
-
-
 
 function geraNamespace(solutionName, areaName, controllerName){
     var texto = `
@@ -318,6 +317,39 @@ function gerarInsert(controllerName, classeName){
     return texto;
 }
   
+function gerarUpdate(controllerName, classeName){
+    var variavelNameClasse = primeiraLetraMinuscula(classeName);
+
+    var saida = `
+    public JsonResult Update${controllerName}([DataSourceRequest] DataSourceRequest request, ${controllerName}ViewModel viewmodel)
+    {
+        ValidarModelDestala(viewmodel);
+        var validationResultViewModel = new ValidationResult<${controllerName}ViewModel>();
+
+        bool dadosValidos = ModelState.IsValid;
+        if (dadosValidos)
+        {
+            Dto.${controllerName}.${controllerName}TO ${variavelNameClasse}TO = (Dto.${controllerName}.${controllerName}TO)viewmodel;
+            ValidationResult validation${controllerName}TO = i${controllerName}AppService.Update${classeName}(${variavelNameClasse}TO);
+
+            bool sucessoAoAtualizar = validation${controllerName}TO.IsValid;
+            if (sucessoAoAtualizar)
+            {
+                validationResultViewModel.Result = (${controllerName}ViewModel) ${variavelNameClasse}TO;
+            }
+            else
+            {
+                validation${controllerName}TO.ValidationResultToModelState(ModelState);
+            }
+        }
+
+        return Json(validationResultViewModel.ToDataSourceResult(request, ModelState), JsonRequestBehavior.AllowGet);
+    }
+    `;
+
+    return saida;
+}
+
 function fecharArquivo(){
     var textoSaida = "}\n}";
     return textoSaida;

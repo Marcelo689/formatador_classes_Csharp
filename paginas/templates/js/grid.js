@@ -21,7 +21,7 @@ function CriarGrid(){
         this.ViewBag.Message = ${dados.ControllerName}.labelTitle;
         const string CONTROLLER_NAME = "${controllerName}";
         string GRID_NAME = CONTROLLER_NAME + "Grid" + Model.ToString();
-        object AREA = "${areaName}";
+        object AREA = "new { area = ${areaName} }";
         var estiloColunaInteira = new { style = "text-align:right" };
         var estiloColunaString = new { style = "text-align:left" };
         var estiloColunaCentralizada = new { style = "text-align:center" };
