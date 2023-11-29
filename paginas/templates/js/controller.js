@@ -1,3 +1,32 @@
+function gerarArquivoController(){
+    var classeConteudo = entrada.value;
+    var dados = getNamespace(classeConteudo);
+
+    dados.PreencheCamposDefault();
+    dados.ClassePrincipal = normalizaClasseName(dados.ClassePrincipal);
+    
+    var areaName = dados.Area;
+    var controllerName = dados.ControllerName;
+    var solutionName = dados.Solution;
+    var classeName = dados.ClassePrincipal;
+    
+    var listaPropriedades = getListProps(classeConteudo);
+
+    var textoSaida = "";
+
+    textoSaida += geraNamespace(solutionName, areaName, controllerName);
+    textoSaida += gerarControlador(controllerName);
+    textoSaida += gerarRead(controllerName, classeName);
+    textoSaida += gerarInsert(controllerName, classeName);
+    textoSaida += gerarUpdate(controllerName,classeName);
+    textoSaida += gerarMetodosValidar(listaPropriedades, dados);
+    textoSaida += fecharArquivo();
+
+    saida.value = textoSaida;
+    
+    copiaAposFormatado();
+}
+
 function retornaTiposUnique(lista){
 
     var listaTipos = [];
@@ -15,13 +44,14 @@ function retornaTiposUnique(lista){
 
 function gerarMetodosValidar(listaPropriedades, dados){
     
+    var listaNomePropriedade = getNomesListaPropriedades(listaPropriedades);
     var tiposContidos = retornaTiposUnique(listaPropriedades);
     var Tipos = new Tipo();
     var saida = "";
 
     if(tiposContidos.includes(Tipos.string)){
-        saida += `
-        \n      private void ValidaStringDoViewModel(string texto, string mensagemEhNulo, bool contemValidacaoTamanhoMaximo = true, int tamanhoMaximo = 0, string mensagemTamanhoMaximo = "")
+        saida += `\n      
+        private void ValidaStringDoViewModel(string texto, string mensagemEhNulo, bool contemValidacaoTamanhoMaximo = true, int tamanhoMaximo = 0, string mensagemTamanhoMaximo = "")
         {
             if (string.IsNullOrWhiteSpace(texto))
             {
@@ -36,8 +66,8 @@ function gerarMetodosValidar(listaPropriedades, dados){
     }
 
     if(tiposContidos.includes(Tipos.intNullAble)){
-        saida += `
-        \n      private void ValidaIntNullableLookUpObrigatorioViewModel(int? numeroNullAble, string mensagemObrigatorio)
+        saida += `\n      
+        private void ValidaIntNullableLookUpObrigatorioViewModel(int? numeroNullAble, string mensagemObrigatorio)
         {
             if (!numeroNullAble.HasValue)
             {
@@ -46,10 +76,24 @@ function gerarMetodosValidar(listaPropriedades, dados){
         }\n
         `;
     }
+    
+    if(seListaContemMatch("Percentual", listaNomePropriedade)){
+        saida += `
+        private void ValidaPercentual(decimal? propriedadePercentual, string mensagemLimitePercentual)
+        {
+            bool valorExcedeuLimite = propriedadePercentual >= 100.0m;
+            if (valorExcedeuLimite)
+            {
+                this.ModelState.AddModelError(string.Empty, mensagemLimitePercentual);
+            }
+
+        }\n
+        `
+    }
 
     if(tiposContidos.includes(Tipos.decimalNullAble)){
-        saida += `
-        \n      private void ValidaDecimalMinMax(decimal? min, decimal? max, string mensagemValorMinMaior)
+        saida += `\n
+        private void ValidaDecimalMinMax(decimal? min, decimal? max, string mensagemValorMinMaior)
         {
             bool valoresNaoPreenchidos = !(min.HasValue && max.HasValue);
             if (valoresNaoPreenchidos)
@@ -62,12 +106,90 @@ function gerarMetodosValidar(listaPropriedades, dados){
             {
                 this.ModelState.AddModelError(string.Empty, mensagemValorMinMaior);
             }
-
         }\n
         `;
+
+       
+
     }
 
     saida += gerarValidacaoModel(listaPropriedades, dados.ClassePrincipal, dados.Area, dados.ControllerName);
+
+    return saida;
+}
+function gerarValidacaoModel(listaPropriedades, nomeClassePrincipal, areaName, controllerName){
+
+    var saida = `private void ValidarModel${nomeClassePrincipal}(${nomeClassePrincipal}ViewModel viewmodel){\n`;
+    var tamanhoMaximoString  = 50;
+    var tipo = new Tipo();
+    var listaPropriedadesJaUsadas = [];
+    var listaPropriedadesJaUsadasTamanhoMaximo = [];
+    var resourcesLabels = [];
+
+    for (let indice = 0; indice < listaPropriedades.length; indice++) {
+        const propriedade = listaPropriedades[indice];
+        
+        if(ehPropriedadeDescricaoComLabelProprio(propriedade.nome)){
+            continue;
+        }
+
+        var propriedadeNormalizada = normalizaNomePropriedade(propriedade.nome);
+
+        switch (propriedade.tipo) {
+            case tipo.string:
+                
+                saida += "\n";
+                saida += `
+            ValidaStringDoViewModel(
+                texto: viewmodel.${propriedade.nome},
+                mensagemEhNulo: App_GlobalResources.${areaName}.${controllerName}.msgCampo${propriedadeNormalizada}Obrigatorio,
+                tamanhoMaximo: ${tamanhoMaximoString},
+                mensagemTamanhoMaximo: App_GlobalResources.${areaName}.${controllerName}.msgCampo${propriedadeNormalizada}TamanhoMaximo
+            );\n`;
+                adicionarResourceObrigatorio(propriedadeNormalizada, listaPropriedadesJaUsadas, resourcesLabels);
+                adicionarResourceTamanhoMaximo(propriedadeNormalizada, listaPropriedadesJaUsadasTamanhoMaximo, resourcesLabels, tamanhoMaximoString);
+                break;
+            case tipo.intNullAble:
+
+                saida += "\n";
+                saida += `
+            ValidaIntNullableLookUpObrigatorioViewModel(
+                numeroNullAble: viewmodel.${propriedade.nome},
+                mensagemObrigatorio: App_GlobalResources.${areaName}.${controllerName}.msgCampo${propriedadeNormalizada}Obrigatorio
+            );\n`;
+
+                adicionarResourceObrigatorio(propriedadeNormalizada, listaPropriedadesJaUsadas, resourcesLabels)
+                break;
+            case tipo.decimal:
+                if(nomeContemPercentual(propriedade.nome)){
+                    saida += "\n";
+                    saida += `
+                    ValidaPercentual(
+                        propriedadePercentual: viewmodel.${propriedade.nome},
+                        mensagemLimitePercentual: App_GlobalResources.${areaName}.${controllerName}.msgLimitePercentual${propriedade.nome}
+                    );\n`;
+                }
+                break;
+            case tipo.decimalNullAble:
+
+                if(contemPropriedadesMinimoEMaximo(propriedade.nome)){
+                    saida += "\n";
+                    saida += `
+                    ValidaDecimalMinMax(
+                        min: viewmodel.PrecoMinimo,
+                        max: viewmodel.PrecoMaximo,
+                        mensagemValorMinMaior: App_GlobalResources.${areaName}.${controllerName}.msgPrecoMinMaior
+                    );\n`;
+                }
+
+                break;
+            default:
+                break;
+        }
+    }
+
+    resourcesLabels.forEach( resource => saida += resource);
+    saida += "      }\n";
 
     return saida;
 }
@@ -98,99 +220,6 @@ function adicionarResourceTamanhoMaximo(propriedadeFullName, listaPropriedadesJa
     }
 }
 
-function gerarValidacaoModel(listaPropriedades, nomeClassePrincipal, areaName, controllerName){
-
-    var saida = `private void ValidarModel(${nomeClassePrincipal}ViewModel viewmodel){\n`;
-    var tamanhoMaximoString  = 50;
-    var tipo = new Tipo();
-    var listaPropriedadesJaUsadas = [];
-    var listaPropriedadesJaUsadasTamanhoMaximo = [];
-    var resourcesLabels = [];
-
-    for (let indice = 0; indice < listaPropriedades.length; indice++) {
-        const propriedade = listaPropriedades[indice];
-        
-        if(ehPropriedadeDescricaoComLabelProprio(propriedade.nome)){
-            continue;
-        }
-
-        var propriedadeNormalizada = normalizaNomePropriedade(propriedade.nome);
-
-        switch (propriedade.tipo) {
-            case tipo.string:
-                
-                saida += "\n";
-                saida += `
-            ValidaStringDoViewModel(
-                texto: viewmodel.${propriedade.nome},
-                mensagemEhNulo: App_GlobalResources.${areaName}.${controllerName}.msgCampo${propriedadeNormalizada}Obrigatorio,
-                tamanhoMaximo: ${tamanhoMaximoString},
-                mensagemTamanhoMaximo: App_GlobalResources.${areaName}.${controllerName}.msgCampo${propriedadeNormalizada}TamanhoMaximo
-            );\n`;
-            adicionarResourceObrigatorio(propriedadeNormalizada, listaPropriedadesJaUsadas, resourcesLabels);
-            adicionarResourceTamanhoMaximo(propriedadeNormalizada, listaPropriedadesJaUsadasTamanhoMaximo, resourcesLabels, tamanhoMaximoString);
-                break;
-            case tipo.intNullAble:
-
-                saida += "\n";
-                saida += `
-            ValidaIntNullableLookUpObrigatorioViewModel(
-                numeroNullAble: viewmodel.${propriedade.nome},
-                mensagemObrigatorio: App_GlobalResources.${areaName}.${controllerName}.msgCampo${propriedadeNormalizada}Obrigatorio
-            );\n`;
-
-            adicionarResourceObrigatorio(propriedadeNormalizada, listaPropriedadesJaUsadas, resourcesLabels)
-                break;
-            // case tipo.decimalNullAble:
-
-            //     saida += "\n";
-            //     saida += `
-            //     ValidaDecimalMinMax(
-            //         min: viewmodel.PrecoMinimo,
-            //         max: viewmodel.PrecoMaximo,
-            //         mensagemValorMinMaior: App_GlobalResources.${areaName}.${controllerName}.msgPrecoMinMaior
-            //     );\n`;
-
-            //     break;
-            default:
-                break;
-        }
-    }
-
-    resourcesLabels.forEach( resource => saida += resource);
-    saida += "      }\n";
-
-    return saida;
-}
-
-function gerarArquivoController(){
-    var classeConteudo = entrada.value;
-    var dados = getNamespace(classeConteudo);
-
-    dados.PreencheCamposDefault();
-    dados.ClassePrincipal = normalizaClasseName(dados.ClassePrincipal);
-    
-    var areaName = dados.Area;
-    var controllerName = dados.ControllerName;
-    var solutionName = dados.Solution;
-    var classeName = dados.ClassePrincipal;
-    
-    var listaPropriedades = getListProps(classeConteudo);
-
-    var textoSaida = "";
-
-    textoSaida += geraNamespace(solutionName, areaName, controllerName);
-    textoSaida += gerarControlador(controllerName);
-    textoSaida += gerarRead(controllerName, classeName);
-    textoSaida += gerarInsert(controllerName, classeName);
-    textoSaida += gerarUpdate(controllerName,classeName);
-    textoSaida += gerarMetodosValidar(listaPropriedades, dados);
-    textoSaida += fecharArquivo();
-
-    saida.value = textoSaida;
-    
-    copiaAposFormatado();
-}
 
 function geraNamespace(solutionName, areaName, controllerName){
     var texto = `
@@ -279,8 +308,10 @@ function gerarRead(controllerName, classeName){
     
 function primeiraLetraMinuscula(nome){
 
-    nome[0] = nome[0].toLowerCase();
-    return nome;
+    var saida = nome[0].toLowerCase();
+
+    saida += nome.substring(1,nome.length);
+    return saida;
 }
 
 function gerarInsert(controllerName, classeName){
@@ -321,25 +352,25 @@ function gerarUpdate(controllerName, classeName){
     var variavelNameClasse = primeiraLetraMinuscula(classeName);
 
     var saida = `
-    public JsonResult Update${controllerName}([DataSourceRequest] DataSourceRequest request, ${controllerName}ViewModel viewmodel)
+    public JsonResult Update${classeName}([DataSourceRequest] DataSourceRequest request, ${classeName}ViewModel viewmodel)
     {
-        ValidarModelDestala(viewmodel);
-        var validationResultViewModel = new ValidationResult<${controllerName}ViewModel>();
+        ValidarModel${classeName}(viewmodel);
+        var validationResultViewModel = new ValidationResult<${classeName}ViewModel>();
 
         bool dadosValidos = ModelState.IsValid;
         if (dadosValidos)
         {
-            Dto.${controllerName}.${controllerName}TO ${variavelNameClasse}TO = (Dto.${controllerName}.${controllerName}TO)viewmodel;
-            ValidationResult validation${controllerName}TO = i${controllerName}AppService.Update${classeName}(${variavelNameClasse}TO);
+            Dto.${controllerName}.${classeName}TO ${variavelNameClasse}TO = (Dto.${controllerName}.${classeName}TO)viewmodel;
+            ValidationResult validation${classeName}TO = i${controllerName}AppService.Update${classeName}(${variavelNameClasse}TO);
 
-            bool sucessoAoAtualizar = validation${controllerName}TO.IsValid;
+            bool sucessoAoAtualizar = validation${classeName}TO.IsValid;
             if (sucessoAoAtualizar)
             {
-                validationResultViewModel.Result = (${controllerName}ViewModel) ${variavelNameClasse}TO;
+                validationResultViewModel.Result = (${classeName}ViewModel) ${variavelNameClasse}TO;
             }
             else
             {
-                validation${controllerName}TO.ValidationResultToModelState(ModelState);
+                validation${classeName}TO.ValidationResultToModelState(ModelState);
             }
         }
 

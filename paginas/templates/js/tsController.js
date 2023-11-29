@@ -62,21 +62,30 @@ function gerarClassePropriedadesInstancia(listaPropriedades){
 
     var saida = "";
     listaPropriedades.forEach( propriedade => {
-        saida += `
-                e.model.${propriedade.nome} = `;
 
-        if(ehPropriedadeComboBox(propriedade.nome)){
-            if(contemDescricao(propriedade.nome)){
-                saida += `kendo.Util.Combo.getText("${replaceDescricaoPorCodigo(propriedade.nome)}");`
-            }else{
-                saida += `kendo.Util.Combo.getValue("${propriedade.nome}");`;
-            }
-        }else{
-            saida += `$("#${propriedade.nome}").val();`;
+        const naoContemItem = !contemId(propriedade.nome);
+        if(naoContemItem){
+            saida += retornaPropriedadeClasse(propriedade);
         }
         
     });
 
+    return saida;
+}
+
+function retornaPropriedadeClasse(propriedade) {
+    var saida = `
+            e.model.${propriedade.nome} = `;
+
+    if (ehPropriedadeComboBox(propriedade.nome)) {
+        if (contemDescricao(propriedade.nome)) {
+            saida += `kendo.Util.Combo.getText("${replaceDescricaoPorCodigo(propriedade.nome)}");`;
+        } else {
+            saida += `kendo.Util.Combo.getValue("${propriedade.nome}");`;
+        }
+    } else {
+        saida += `$("#${propriedade.nome}").val();`;
+    }
     return saida;
 }
 

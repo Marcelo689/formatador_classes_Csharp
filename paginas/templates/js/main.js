@@ -107,6 +107,10 @@ function exibeMensagemCentralizada(){
 
 }
 
+function nomeContemPercentual(nomePropriedade){
+    return nomePropriedade.indexOf("Percentual") != -1;
+}
+
 function ehPropriedadeDescricaoComLabelProprio(propriedade){
     return contemDescricao(propriedade) && ehPropriedadeComposta(propriedade);
 }
@@ -117,7 +121,7 @@ function ehPropriedadeComposta(nomePropriedade){
     return propriedadeEhComposta;
 }
 
-function sePropriedadeContemPalavra(propriedade, listaPalavras){
+function seContemPropriedadeInPalavraOfListaDePalavras(propriedade, listaPalavras){
 
     var contem = false;
     for (palavra of listaPalavras){
@@ -132,9 +136,99 @@ function sePropriedadeContemPalavra(propriedade, listaPalavras){
 
     return contem;
 }
+
+function seListaContemMatch(match, listaPalavras){
+
+    var contem = false;
+    for (palavra of listaPalavras){
+        const existeMatch = encontrouNaPalavra(match, palavra);
+
+        if(existeMatch){
+            contem = true;
+            return contem;
+        }
+    };
+
+    return contem;
+}
+
+function encontrouNaPalavra(match, palavra) {
+    return palavra.indexOf(match) != -1;
+}
+
+function listaPropriedadeContemAoMenos2Matchs(listaNomePropriedade, match, nOcorrencias = 2){
+
+    var contador = 0;
+    listaNomePropriedade.forEach(propriedade => {
+        if(encontrouNaPalavra(match, propriedade))
+            contador++;
+    });
+
+    return contador >= nOcorrencias;
+}
+
+function contemPropriedadesMinimoEMaximo(listaNomePropriedade, nomePropriedade){
+    const contem2Matchs = listaPropriedadeContemAoMenos2Matchs(listaNomePropriedade, match);
+    var encontrouAmbasProps = false;
+
+    if(contem2Matchs){
+        var propriedadeMinimaMaximaNormalizada = normalizaPropMinMax(nomePropriedade);
+        var encontrouMinimoDaPropriedade = false;
+        var encontrouMaximoDaPropriedade = false;
+
+        listaNomePropriedade.forEach( propriedade => {
+            if(encontrouNaPalavra(propriedadeMinimaMaximaNormalizada, propriedade)){
+                if(ehPropriedadeMinMax(propriedade)){
+
+                    if(ehPropriedadeMinima(propriedade)){
+                        encontrouMinimoDaPropriedade = true;
+                    }else if(ehPropriedadeMaxima(propriedade)){
+                        encontrouMaximoDaPropriedade = true;
+                    }
+
+                    if(encontrouMaximoDaPropriedade == encontrouMinimoDaPropriedade)
+                        encontrouAmbasProps = true;
+                }
+            }
+        });
+
+    }
+
+    return encontrouAmbasProps;
+}
+
+function normalizaPropMinMax(nomePropriedade){
+    nomePropriedade = ApagarDaPalavra(nomePropriedade, "Min");
+    nomePropriedade = ApagarDaPalavra(nomePropriedade, "Minimo");
+    nomePropriedade = ApagarDaPalavra(nomePropriedade, "Max");
+    nomePropriedade = ApagarDaPalavra(nomePropriedade, "Maximo");
+
+    return nomePropriedade;
+}
+
+function ApagarDaPalavra(nomePropriedade, textoParaApagar) {
+    return nomePropriedade.replace(textoParaApagar, "");
+}
+
+function ehPropriedadeMinMax(propriedadeNome){
+    if(ehPropriedadeMinima(propriedadeNome) || ehPropriedadeMaxima(propriedadeNome))
+        return true;
+
+    return false;
+}
+
+function ehPropriedadeMaxima(propriedadeNome) {
+    return encontrouNaPalavra("Max", propriedadeNome) || encontrouNaPalavra("Maximo", propriedadeNome);
+}
+
+function ehPropriedadeMinima(propriedadeNome) {
+    return encontrouNaPalavra("Min", propriedadeNome) || encontrouNaPalavra("Minimo", propriedadeNome);
+}
+
 function contemId(propriedadeNome){
     return propriedadeNome.indexOf("Id") != -1;
 }
+
 function contarNumeroLetrasMaiusculas(nomePropriedade){
 
     var contador = 0;
@@ -164,6 +258,7 @@ function contemDescricao(propriedadeNome){
 function replaceDescricaoPorCodigo(propriedadeNome){
     return propriedadeNome.replace("Descricao", "Codigo");
 }
+
 function Dados(Area,Solution,ControllerName, ClassePrincipal){
     this.Area = Area;
     this.Solution = Solution;
@@ -281,6 +376,16 @@ function getNamespace(classe){
     return dados;
 }
  
+function getNomesListaPropriedades(listaPropriedades){
+    var listaSaida = [];
+
+    listaPropriedades.forEach(propriedade => {
+        listaSaida.push(propriedade.nome);
+    });
+
+    return listaSaida;
+}
+
 function Tipo(tipo, nome){
     this.decimalNullAble = "decimal?";
     this.decimal = "decimal";
