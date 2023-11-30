@@ -5,6 +5,8 @@ namespace Universal.Fabrica.Web.Areas.Operacoes.Models.CadastrarTemplate{
         public DateTime Data {get;set;}
         public DateTime? DataFinalizado {get;set;}
         public decimal Salario {get;set;}
+        public decimal PrecoMinimo {get;set;}
+        public decimal PrecoMaximo {get;set;}
         public double Peso {get;set;}
         public float Altura {get;set;}
         public int? TipoBananaCodigo {get;set;}

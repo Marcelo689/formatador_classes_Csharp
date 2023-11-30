@@ -109,16 +109,17 @@ function gerarMetodosValidar(listaPropriedades, dados){
         }\n
         `;
 
-       
-
     }
 
     saida += gerarValidacaoModel(listaPropriedades, dados.ClassePrincipal, dados.Area, dados.ControllerName);
 
     return saida;
 }
-function gerarValidacaoModel(listaPropriedades, nomeClassePrincipal, areaName, controllerName){
 
+function gerarValidacaoModel(listaPropriedades, nomeClassePrincipal, areaName, controllerName){
+    var listaNomePropriedade = getNomesListaPropriedades(listaPropriedades);
+    var listaPropriedadeMinMaxJaCapturadas = [];
+    
     var saida = `private void ValidarModel${nomeClassePrincipal}(${nomeClassePrincipal}ViewModel viewmodel){\n`;
     var tamanhoMaximoString  = 50;
     var tipo = new Tipo();
@@ -129,6 +130,11 @@ function gerarValidacaoModel(listaPropriedades, nomeClassePrincipal, areaName, c
     for (let indice = 0; indice < listaPropriedades.length; indice++) {
         const propriedade = listaPropriedades[indice];
         
+        if(ehPropriedadeMinMax(propriedade.nome)){
+            var propriedadeMinMax = normalizaPropMinMax(propriedade.nome);
+            listaPropriedadeMinMaxJaCapturadas.push(propriedadeMinMax);
+        }
+
         if(ehPropriedadeDescricaoComLabelProprio(propriedade.nome)){
             continue;
         }
@@ -161,27 +167,10 @@ function gerarValidacaoModel(listaPropriedades, nomeClassePrincipal, areaName, c
                 adicionarResourceObrigatorio(propriedadeNormalizada, listaPropriedadesJaUsadas, resourcesLabels)
                 break;
             case tipo.decimal:
-                if(nomeContemPercentual(propriedade.nome)){
-                    saida += "\n";
-                    saida += `
-                    ValidaPercentual(
-                        propriedadePercentual: viewmodel.${propriedade.nome},
-                        mensagemLimitePercentual: App_GlobalResources.${areaName}.${controllerName}.msgLimitePercentual${propriedade.nome}
-                    );\n`;
-                }
+                saida += adicionarValidacaoDecimal(propriedade, areaName, controllerName, listaNomePropriedade, listaPropriedadeMinMaxJaCapturadas);
                 break;
             case tipo.decimalNullAble:
-
-                if(contemPropriedadesMinimoEMaximo(propriedade.nome)){
-                    saida += "\n";
-                    saida += `
-                    ValidaDecimalMinMax(
-                        min: viewmodel.PrecoMinimo,
-                        max: viewmodel.PrecoMaximo,
-                        mensagemValorMinMaior: App_GlobalResources.${areaName}.${controllerName}.msgPrecoMinMaior
-                    );\n`;
-                }
-
+                saida += adicionarValidacaoDecimal(propriedade, areaName, controllerName, listaNomePropriedade, listaPropriedadeMinMaxJaCapturadas);
                 break;
             default:
                 break;
@@ -191,6 +180,34 @@ function gerarValidacaoModel(listaPropriedades, nomeClassePrincipal, areaName, c
     resourcesLabels.forEach( resource => saida += resource);
     saida += "      }\n";
 
+    return saida;
+}
+
+function adicionarValidacaoDecimal(propriedade, areaName, controllerName, listaNomePropriedade, listaPropriedadeMinMaxJaCapturadas) {
+    var saida = "";
+
+    var propriedadeMinMaxNormalizada = normalizaPropMinMax(propriedade.nome);
+
+    const primeiraOcorrenciaDestaPropriedadeMaxMin = !listaPropriedadeContemAoMenos2Matchs(listaPropriedadeMinMaxJaCapturadas, propriedadeMinMaxNormalizada);
+    if (nomeContemPercentual(propriedade.nome)) {
+        saida += "\n";
+        saida += `
+                    ValidaPercentual(
+                        propriedadePercentual: viewmodel.${propriedade.nome},
+                        mensagemLimitePercentual: App_GlobalResources.${areaName}.${controllerName}.msgLimitePercentual${propriedade.nome}
+                    );\n`;
+    }else if(primeiraOcorrenciaDestaPropriedadeMaxMin){
+        
+        if (contemPropriedadesMinimoEMaximo(listaNomePropriedade, propriedade.nome)) {
+            saida += "\n";
+            saida += `
+            ValidaDecimalMinMax(
+                min: viewmodel.PrecoMinimo,
+                max: viewmodel.PrecoMaximo,
+                mensagemValorMinMaior: App_GlobalResources.${areaName}.${controllerName}.msgPrecoMinMaior
+                );\n`;
+        }
+    }  
     return saida;
 }
 
@@ -219,7 +236,6 @@ function adicionarResourceTamanhoMaximo(propriedadeFullName, listaPropriedadesJa
         listaPropriedadesJaUsadasTamanhoMaximo.push(propriedadeFullName);
     }
 }
-
 
 function geraNamespace(solutionName, areaName, controllerName){
     var texto = `

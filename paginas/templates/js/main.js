@@ -168,11 +168,11 @@ function listaPropriedadeContemAoMenos2Matchs(listaNomePropriedade, match, nOcor
 }
 
 function contemPropriedadesMinimoEMaximo(listaNomePropriedade, nomePropriedade){
-    const contem2Matchs = listaPropriedadeContemAoMenos2Matchs(listaNomePropriedade, match);
+    var propriedadeMinimaMaximaNormalizada = normalizaPropMinMax(nomePropriedade);
+    const contem2Matchs = listaPropriedadeContemAoMenos2Matchs(listaNomePropriedade, propriedadeMinimaMaximaNormalizada);
     var encontrouAmbasProps = false;
 
     if(contem2Matchs){
-        var propriedadeMinimaMaximaNormalizada = normalizaPropMinMax(nomePropriedade);
         var encontrouMinimoDaPropriedade = false;
         var encontrouMaximoDaPropriedade = false;
 
@@ -198,10 +198,10 @@ function contemPropriedadesMinimoEMaximo(listaNomePropriedade, nomePropriedade){
 }
 
 function normalizaPropMinMax(nomePropriedade){
-    nomePropriedade = ApagarDaPalavra(nomePropriedade, "Min");
     nomePropriedade = ApagarDaPalavra(nomePropriedade, "Minimo");
-    nomePropriedade = ApagarDaPalavra(nomePropriedade, "Max");
+    nomePropriedade = ApagarDaPalavra(nomePropriedade, "Min");
     nomePropriedade = ApagarDaPalavra(nomePropriedade, "Maximo");
+    nomePropriedade = ApagarDaPalavra(nomePropriedade, "Max");
 
     return nomePropriedade;
 }
