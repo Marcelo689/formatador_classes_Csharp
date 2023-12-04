@@ -41,7 +41,7 @@
         var listaPalavrasLabelIgnorados = ["Codigo" , "Id"];
         var propriedadeComEspacos = AdicionarEspacos(propriedade);
     
-        if(sePropriedadeContemPalavra(propriedadeComEspacos, listaPalavrasLabelIgnorados))
+        if(seListaContemMatch(propriedadeComEspacos, listaPalavrasLabelIgnorados))
             return "";
 
         var propriedadeEmArray = propriedadeComEspacos.split(" ");

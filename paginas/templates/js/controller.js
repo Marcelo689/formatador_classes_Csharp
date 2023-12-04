@@ -19,7 +19,7 @@ function gerarArquivoController(){
     textoSaida += gerarRead(controllerName, classeName);
     textoSaida += gerarInsert(controllerName, classeName);
     textoSaida += gerarUpdate(controllerName,classeName);
-    textoSaida += gerarDelete(classeName);
+    textoSaida += gerarDelete(controllerName, classeName);
     textoSaida += gerarMetodosValidar(listaPropriedades, dados);
     textoSaida += fecharArquivo();
 
@@ -49,21 +49,34 @@ function gerarMetodosValidar(listaPropriedades, dados){
     var tiposContidos = retornaTiposUnique(listaPropriedades);
     var Tipos = new Tipo();
     var saida = "";
-
+    saida += `
+        private void AdicionaMensagemErroAoStateModel(string mensagemErro)
+        {
+            this.ModelState.AddModelError(string.Empty, mensagemErro);
+        }
+    `
     if(tiposContidos.includes(Tipos.string)){
         saida += `\n      
-        private void ValidaStringDoViewModel(string texto, string mensagemEhNulo, bool contemValidacaoTamanhoMaximo = true, int tamanhoMaximo = 0, string mensagemTamanhoMaximo = "")
+        private void ValidaStringDoViewModel(string valorCampo, string mensagemTamanhoMaximo, int tamanhoMaximo = 0, bool contemValidacaoNulo = false, string mensagemEhNulo = "")
         {
-            if (string.IsNullOrWhiteSpace(texto))
+            bool campoNulo = string.IsNullOrWhiteSpace(valorCampo);
+
+            if (campoNulo)
             {
-                this.ModelState.AddModelError(string.Empty, mensagemEhNulo);
+                if (contemValidacaoNulo)
+                {
+                    AdiconaMensagemErroAoStateModel(mensagemEhNulo);
+                }
             }
-            else if (contemValidacaoTamanhoMaximo && texto.Length > tamanhoMaximo)
+            else
             {
-                this.ModelState.AddModelError(string.Empty, mensagemTamanhoMaximo);
+                bool campoMaiorQuePermitido = valorCampo.Length > tamanhoMaximo;
+                if (campoMaiorQuePermitido)
+                {
+                    AdiconaMensagemErroAoStateModel(mensagemTamanhoMaximo);
+                }
             }
-        }\n
-        `;
+        }\n`;
     }
 
     if(tiposContidos.includes(Tipos.intNullAble)){
@@ -72,7 +85,7 @@ function gerarMetodosValidar(listaPropriedades, dados){
         {
             if (!numeroNullAble.HasValue)
             {
-                this.ModelState.AddModelError(string.Empty, mensagemObrigatorio);
+                AdicionaMensagemErroAoStateModel(mensagemObrigatorio);
             }
         }\n
         `;
@@ -85,9 +98,8 @@ function gerarMetodosValidar(listaPropriedades, dados){
             bool valorExcedeuLimite = propriedadePercentual >= 100.0m;
             if (valorExcedeuLimite)
             {
-                this.ModelState.AddModelError(string.Empty, mensagemLimitePercentual);
+                AdicionaMensagemErroAoStateModel(mensagemLimitePercentual);
             }
-
         }\n
         `
     }
@@ -105,7 +117,7 @@ function gerarMetodosValidar(listaPropriedades, dados){
             bool valorMinimoMaior = min.Value > max.Value;
             if (valorMinimoMaior)
             {
-                this.ModelState.AddModelError(string.Empty, mensagemValorMinMaior);
+                AdicionaMensagemErroAoStateModel(mensagemValorMinMaior);
             }
         }\n
         `;
@@ -148,10 +160,11 @@ function gerarValidacaoModel(listaPropriedades, nomeClassePrincipal, areaName, c
                 saida += "\n";
                 saida += `
             ValidaStringDoViewModel(
-                texto: viewmodel.${propriedade.nome},
-                mensagemEhNulo: App_GlobalResources.${areaName}.${controllerName}.msgCampo${propriedadeNormalizada}Obrigatorio,
-                tamanhoMaximo: ${tamanhoMaximoString},
-                mensagemTamanhoMaximo: App_GlobalResources.${areaName}.${controllerName}.msgCampo${propriedadeNormalizada}TamanhoMaximo
+                valorCampo: viewmodel.${propriedade.nome},
+                tamanhoMaximo: 50,
+                mensagemTamanhoMaximo: App_GlobalResources.${areaName}.${controllerName}.msgCampo${propriedade.nome}TamanhoMaximo,
+                mensagemEhNulo : App_GlobalResources.${areaName}.${controllerName}.msgCampo${propriedade.nome}TamanhoMaximo,
+                contemValidacaoNulo : true
             );\n`;
                 adicionarResourceObrigatorio(propriedadeNormalizada, listaPropriedadesJaUsadas, resourcesLabels);
                 adicionarResourceTamanhoMaximo(propriedadeNormalizada, listaPropriedadesJaUsadasTamanhoMaximo, resourcesLabels, tamanhoMaximoString);
@@ -180,7 +193,7 @@ function gerarValidacaoModel(listaPropriedades, nomeClassePrincipal, areaName, c
     }
 
     resourcesLabels.forEach( resource => saida += resource);
-    saida += "      }\n";
+    saida += "\n      }\n";
 
     return saida;
 }
@@ -232,10 +245,8 @@ function adicionarResourceObrigatorio(propriedadeFullName, listaPropriedadesJaUs
 }
 
 function insereResourceAndPalavrasUsadasObrigatorio(propriedadeFullName, listaResources, listaPropriedadesJaUsadas) {
-    if (ehLabelResx(propriedadeFullName)) {
-        listaResources.push(gerarValidationResx(`msgCampo${propriedadeFullName}Obrigatorio`, `O campo ${AdicionarEspacos(propriedadeFullName)} é obrigatório.`));
-    }
     if (naoEhLabelResx(propriedadeFullName)) {
+        listaResources.push(gerarValidationResx(`msgCampo${propriedadeFullName}Obrigatorio`, `O campo ${AdicionarEspacos(propriedadeFullName)} é obrigatório.`));
         listaPropriedadesJaUsadas.push(propriedadeFullName);
     }
 }
@@ -252,10 +263,8 @@ function adicionarResourceLimitePercentual(propriedadeFullName, listaPropriedade
 }
 
 function insereResourceAndPalavrasUsadasPercentual(propriedadeFullName, listaResources, listaPropriedadesJaUsadas) {
-    if (ehLabelResx(propriedadeFullName)) {
-        listaResources.push(gerarValidationResx(`msgLimite${propriedadeFullName}`, `O campo ${AdicionarEspacos(propriedadeFullName)} deve ser menor ou igual a 100.`));
-    }
     if (naoEhLabelResx(propriedadeFullName)) {
+        listaResources.push(gerarValidationResx(`msgLimite${propriedadeFullName}`, `O campo ${AdicionarEspacos(propriedadeFullName)} deve ser menor ou igual a 100.`));
         listaPropriedadesJaUsadas.push(propriedadeFullName);
     }
 }
@@ -270,8 +279,6 @@ function adicionarResourceMinMax(propriedadeFullName, listaPropriedadesJaUsadas,
     else{
         if (naoEhLabelResx(propriedadeFullName)) {
             listaResources.push(gerarValidationResx(`msg${propriedadeNormalizada}MinMax`, `${AdicionarEspacos(propriedadeNormalizada)} Mínimo deve ser menor que ${AdicionarEspacos(propriedadeNormalizada)} Máximo.`));
-        }
-        if (naoEhLabelResx(propriedadeFullName)) {
             listaPropriedadesJaUsadas.push(propriedadeFullName);
         }
     }
@@ -285,8 +292,6 @@ function adicionarResourceTamanhoMaximo(propriedadeFullName, listaPropriedadesJa
     else{
         if (naoEhLabelResx(propriedadeFullName)) {
             listaResources.push(gerarValidationResx(`msgCampo${propriedadeFullName}TamanhoMaximo`, `O campo ${AdicionarEspacos(propriedadeFullName)} não pode exceder ${numeroLetras} caracteres.`));
-        }
-        if (naoEhLabelResx(propriedadeFullName)) {
             listaPropriedadesJaUsadasTamanhoMaximo.push(propriedadeFullName);
         }
     }
@@ -311,24 +316,22 @@ function geraNamespace(solutionName, areaName, controllerName){
 
 namespace Universal.Tois.${solutionName}.Web.Areas.${areaName}.Controllers
 {
-    #if !DEBUG
-        [Authorize( Roles = "${controllerName}" )]
-    #endif
-    `;
+        #if !DEBUG
+            [Authorize( Roles = "ControleRegulagemLinhaTalo" )]
+        #endif\n`;
 
     return texto;
 }
 
 function gerarControlador(NomeController){  
     var arquivoControllador =  
-        `\n
-    public class ${NomeController}Controller : ToisController {\n
+    `public class ${NomeController}Controller : ToisController {\n
 
         public I${NomeController}AppService i${NomeController}AppService { get;}
 
         public ${NomeController}Controller(I${NomeController}AppService i${NomeController}AppService)
         {
-            i${NomeController}AppService = i${NomeController}AppService;
+            this.i${NomeController}AppService = i${NomeController}AppService;
         }
 
         public ActionResult Index(){
@@ -444,14 +447,14 @@ function gerarUpdate(controllerName, classeName){
     return saida;
 }
 
-function gerarDelete(classeName){
+function gerarDelete(controllerName, classeName){
     var variavelNameClasse = primeiraLetraMinuscula(classeName);
 
     var saida = `
     public JsonResult Delete${classeName}([DataSourceRequest] DataSourceRequest request, int id)
     {
         ValidationResult<${classeName}ViewModel> validationResultViewModel = new ValidationResult<${classeName}ViewModel>();
-        ValidationResult validation${classeName}TO = iControleRegulagemLinhaDestalaAppService.Delete${classeName}(${variavelNameClasse}Id);
+        ValidationResult validation${classeName}TO = i${controllerName}AppService.Delete${classeName}(${variavelNameClasse}Id);
 
         bool erroAoDeletar = !validation${classeName}TO.IsValid;
         if (erroAoDeletar)

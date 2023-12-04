@@ -21,7 +21,7 @@ function CriarGrid(){
         this.ViewBag.Message = ${dados.ControllerName}.labelTitle;
         const string CONTROLLER_NAME = "${controllerName}";
         string GRID_NAME = CONTROLLER_NAME + "Grid" + Model.ToString();
-        object AREA = "new { area = ${areaName} }";
+        object AREA = new { area = "${areaName}" };
         var estiloColunaInteira = new { style = "text-align:right" };
         var estiloColunaString = new { style = "text-align:left" };
         var estiloColunaCentralizada = new { style = "text-align:center" };
@@ -67,12 +67,12 @@ function CriarGrid(){
     .Update( c => c.Action("Update${nomeReduzidoClasse}", CONTROLLER_NAME, AREA))
     .Events( ev => {
         ev.RequestStart("OpenLoadingWindow");
+        ev.Error("Universal.ErrorHandling.error_handler.bind({ WidgetID: '" + GRID_NAME + "_" + this.Model + "'})");
         ev.RequestEnd("CloseLoadingWindow");
     })
     ).Events( ev =>
     {
         ev.Save("Events.onSave${nomeReduzidoClasse}");
-        ev.Error("Universal.ErrorHandling.error_handler.bind({ WidgetID: '" + GRID_NAME + "_" + this.Model + "'})");
         ev.DetailInit("Events.detailInit${nomeReduzidoClasse}Grid");
     }).Events(ev =>
         {
@@ -161,7 +161,7 @@ function RetornaColumns(classe, grid){
             var tipoPropriedade = linha.substr(indicePublic).split(" ")[1];
 
             const ehPalavraComposta = ehPropriedadeComposta(nomePropriedade);
-            const propriedadeNaoSeUsaNaGrid = sePropriedadeContemPalavra(nomePropriedade, listaPalavrasExcluidas);
+            const propriedadeNaoSeUsaNaGrid = seListaContemMatch(nomePropriedade, listaPalavrasExcluidas);
 
             if(propriedadeNaoSeUsaNaGrid)
                 continue;
