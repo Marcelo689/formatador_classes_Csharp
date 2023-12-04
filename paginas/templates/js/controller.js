@@ -19,6 +19,7 @@ function gerarArquivoController(){
     textoSaida += gerarRead(controllerName, classeName);
     textoSaida += gerarInsert(controllerName, classeName);
     textoSaida += gerarUpdate(controllerName,classeName);
+    textoSaida += gerarDelete(classeName);
     textoSaida += gerarMetodosValidar(listaPropriedades, dados);
     textoSaida += fecharArquivo();
 
@@ -164,13 +165,14 @@ function gerarValidacaoModel(listaPropriedades, nomeClassePrincipal, areaName, c
                 mensagemObrigatorio: App_GlobalResources.${areaName}.${controllerName}.msgCampo${propriedadeNormalizada}Obrigatorio
             );\n`;
 
-                adicionarResourceObrigatorio(propriedadeNormalizada, listaPropriedadesJaUsadas, resourcesLabels)
+                adicionarResourceObrigatorio(propriedadeNormalizada, listaPropriedadesJaUsadas, resourcesLabels);
                 break;
             case tipo.decimal:
-                saida += adicionarValidacaoDecimal(propriedade, areaName, controllerName, listaNomePropriedade, listaPropriedadeMinMaxJaCapturadas);
+                saida += adicionarValidacaoDecimal(propriedade, areaName, controllerName, listaNomePropriedade, listaPropriedadeMinMaxJaCapturadas, resourcesLabels, listaPropriedadesJaUsadas);
+                adicionarResourceObrigatorio(propriedadeNormalizada, listaPropriedadesJaUsadas, resourcesLabels);
                 break;
             case tipo.decimalNullAble:
-                saida += adicionarValidacaoDecimal(propriedade, areaName, controllerName, listaNomePropriedade, listaPropriedadeMinMaxJaCapturadas);
+                saida += adicionarValidacaoDecimal(propriedade, areaName, controllerName, listaNomePropriedade, listaPropriedadeMinMaxJaCapturadas, resourcesLabels, listaPropriedadesJaUsadas);
                 break;
             default:
                 break;
@@ -183,7 +185,7 @@ function gerarValidacaoModel(listaPropriedades, nomeClassePrincipal, areaName, c
     return saida;
 }
 
-function adicionarValidacaoDecimal(propriedade, areaName, controllerName, listaNomePropriedade, listaPropriedadeMinMaxJaCapturadas) {
+function adicionarValidacaoDecimal(propriedade, areaName, controllerName, listaNomePropriedade, listaPropriedadeMinMaxJaCapturadas, listaPropriedadesJaUsadas, resourcesLabels) {
     var saida = "";
 
     var propriedadeMinMaxNormalizada = normalizaPropMinMax(propriedade.nome);
@@ -192,10 +194,12 @@ function adicionarValidacaoDecimal(propriedade, areaName, controllerName, listaN
     if (nomeContemPercentual(propriedade.nome)) {
         saida += "\n";
         saida += `
-                    ValidaPercentual(
-                        propriedadePercentual: viewmodel.${propriedade.nome},
-                        mensagemLimitePercentual: App_GlobalResources.${areaName}.${controllerName}.msgLimitePercentual${propriedade.nome}
-                    );\n`;
+            ValidaPercentual(
+                propriedadePercentual: viewmodel.${propriedade.nome},
+                mensagemLimitePercentual: App_GlobalResources.${areaName}.${controllerName}.msgLimite${propriedade.nome}
+            );\n`;
+
+            adicionarResourceLimitePercentual(propriedade.nome, listaPropriedadesJaUsadas, resourcesLabels);
     }else if(primeiraOcorrenciaDestaPropriedadeMaxMin){
         
         if (contemPropriedadesMinimoEMaximo(listaNomePropriedade, propriedade.nome)) {
@@ -204,8 +208,10 @@ function adicionarValidacaoDecimal(propriedade, areaName, controllerName, listaN
             ValidaDecimalMinMax(
                 min: viewmodel.PrecoMinimo,
                 max: viewmodel.PrecoMaximo,
-                mensagemValorMinMaior: App_GlobalResources.${areaName}.${controllerName}.msgPrecoMinMaior
+                mensagemValorMinMaior: App_GlobalResources.${areaName}.${controllerName}.msg${propriedadeMinMaxNormalizada}MinMax
                 );\n`;
+
+            adicionarResourceMinMax(propriedade.nome, listaPropriedadesJaUsadas, resourcesLabels);
         }
     }  
     return saida;
@@ -221,8 +227,53 @@ function adicionarResourceObrigatorio(propriedadeFullName, listaPropriedadesJaUs
     if(existe)
         return;
     else{
+        insereResourceAndPalavrasUsadasObrigatorio(propriedadeFullName, listaResources, listaPropriedadesJaUsadas);
+    }
+}
+
+function insereResourceAndPalavrasUsadasObrigatorio(propriedadeFullName, listaResources, listaPropriedadesJaUsadas) {
+    if (ehLabelResx(propriedadeFullName)) {
         listaResources.push(gerarValidationResx(`msgCampo${propriedadeFullName}Obrigatorio`, `O campo ${AdicionarEspacos(propriedadeFullName)} é obrigatório.`));
+    }
+    if (naoEhLabelResx(propriedadeFullName)) {
         listaPropriedadesJaUsadas.push(propriedadeFullName);
+    }
+}
+
+function adicionarResourceLimitePercentual(propriedadeFullName, listaPropriedadesJaUsadas, listaResources){
+    var existe = listaPropriedadesJaUsadas.includes(propriedadeFullName);
+
+    if(existe)
+        return;
+    else{
+        insereResourceAndPalavrasUsadasPercentual(propriedadeFullName, listaResources, listaPropriedadesJaUsadas);
+    }
+  
+}
+
+function insereResourceAndPalavrasUsadasPercentual(propriedadeFullName, listaResources, listaPropriedadesJaUsadas) {
+    if (ehLabelResx(propriedadeFullName)) {
+        listaResources.push(gerarValidationResx(`msgLimite${propriedadeFullName}`, `O campo ${AdicionarEspacos(propriedadeFullName)} deve ser menor ou igual a 100.`));
+    }
+    if (naoEhLabelResx(propriedadeFullName)) {
+        listaPropriedadesJaUsadas.push(propriedadeFullName);
+    }
+}
+
+function adicionarResourceMinMax(propriedadeFullName, listaPropriedadesJaUsadas, listaResources){
+    var existe = listaPropriedadesJaUsadas.includes(propriedadeFullName);
+
+    var propriedadeNormalizada = normalizaPropMinMax(propriedadeFullName);
+
+    if(existe)
+        return;
+    else{
+        if (naoEhLabelResx(propriedadeFullName)) {
+            listaResources.push(gerarValidationResx(`msg${propriedadeNormalizada}MinMax`, `${AdicionarEspacos(propriedadeNormalizada)} Mínimo deve ser menor que ${AdicionarEspacos(propriedadeNormalizada)} Máximo.`));
+        }
+        if (naoEhLabelResx(propriedadeFullName)) {
+            listaPropriedadesJaUsadas.push(propriedadeFullName);
+        }
     }
 }
 
@@ -232,8 +283,12 @@ function adicionarResourceTamanhoMaximo(propriedadeFullName, listaPropriedadesJa
     if(existe)
         return;
     else{
-        listaResources.push(gerarValidationResx(`msgCampo${propriedadeFullName}TamanhoMaximo`, `O campo ${AdicionarEspacos(propriedadeFullName)} não pode exceder ${numeroLetras} caracteres.`));
-        listaPropriedadesJaUsadasTamanhoMaximo.push(propriedadeFullName);
+        if (naoEhLabelResx(propriedadeFullName)) {
+            listaResources.push(gerarValidationResx(`msgCampo${propriedadeFullName}TamanhoMaximo`, `O campo ${AdicionarEspacos(propriedadeFullName)} não pode exceder ${numeroLetras} caracteres.`));
+        }
+        if (naoEhLabelResx(propriedadeFullName)) {
+            listaPropriedadesJaUsadasTamanhoMaximo.push(propriedadeFullName);
+        }
     }
 }
 
@@ -321,14 +376,6 @@ function gerarRead(controllerName, classeName){
 
     return texto;
 }
-    
-function primeiraLetraMinuscula(nome){
-
-    var saida = nome[0].toLowerCase();
-
-    saida += nome.substring(1,nome.length);
-    return saida;
-}
 
 function gerarInsert(controllerName, classeName){
 
@@ -388,6 +435,28 @@ function gerarUpdate(controllerName, classeName){
             {
                 validation${classeName}TO.ValidationResultToModelState(ModelState);
             }
+        }
+
+        return Json(validationResultViewModel.ToDataSourceResult(request, ModelState), JsonRequestBehavior.AllowGet);
+    }
+    `;
+
+    return saida;
+}
+
+function gerarDelete(classeName){
+    var variavelNameClasse = primeiraLetraMinuscula(classeName);
+
+    var saida = `
+    public JsonResult Delete${classeName}([DataSourceRequest] DataSourceRequest request, int id)
+    {
+        ValidationResult<${classeName}ViewModel> validationResultViewModel = new ValidationResult<${classeName}ViewModel>();
+        ValidationResult validation${classeName}TO = iControleRegulagemLinhaDestalaAppService.Delete${classeName}(${variavelNameClasse}Id);
+
+        bool erroAoDeletar = !validation${classeName}TO.IsValid;
+        if (erroAoDeletar)
+        {
+            validationResultViewModel.ValidationResultToModelState(ModelState);
         }
 
         return Json(validationResultViewModel.ToDataSourceResult(request, ModelState), JsonRequestBehavior.AllowGet);

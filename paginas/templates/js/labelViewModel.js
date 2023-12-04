@@ -97,16 +97,16 @@ function ignorarLinhaCasoConterPalavrasChave(linha){
 
     var listaPalavrasExcluidas = [ "[Display(","nameof(", "typeof("];
 
-    return contemNaLista(linha, listaPalavrasExcluidas);
+    return itemDaListaContemNaPalavra(linha, listaPalavrasExcluidas);
 }
 
 function contemPalavrasIndesejadas(palavra){
 
     var listaPalavrasExcluidas = ["Id","TO", "class"];
-    return contemNaLista(palavra, listaPalavrasExcluidas);
+    return itemDaListaContemNaPalavra(palavra, listaPalavrasExcluidas);
 }
 
-function contemNaLista(palavra, lista){
+function itemDaListaContemNaPalavra(palavra, lista){
     for (let index = 0; index < lista.length; index++) {
         const item = lista[index];
 

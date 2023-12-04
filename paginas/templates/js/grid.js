@@ -55,7 +55,7 @@ function CriarGrid(){
     {`;
     grid = RetornaColumns(classeCompleta, grid);
     grid += `\n
-        cols.Command(cmd => cmd.Edit());
+        cols.Command(cmd => cmd.Edit()).HtmlAttributes(estiloColunaCentralizada).Width(200);
 
     })
     .DataSource(dataSource => dataSource
@@ -74,8 +74,13 @@ function CriarGrid(){
         ev.Save("Events.onSave${nomeReduzidoClasse}");
         ev.Error("Universal.ErrorHandling.error_handler.bind({ WidgetID: '" + GRID_NAME + "_" + this.Model + "'})");
         ev.DetailInit("Events.detailInit${nomeReduzidoClasse}Grid");
+    }).Events(ev =>
+        {
+            ev.Save("Events.onSave${nomeReduzidoClasse}");
+            ev.Edit("Events.onBeforeEdit${nomeReduzidoClasse}");
+            ev.DetailInit("Events.detailInit${nomeReduzidoClasse}Grid");
     })
-    )
+)
 
 <script>
     Variables.urlDetailInit${nomeReduzidoClasse}Grid = '@Url.Action("${nomeReduzidoClasse}DetailInit", CONTROLLER_NAME, AREA)';
@@ -183,7 +188,6 @@ function geraColunaGridHidden(nomePropriedade){
     return `
         cols.Bound(c => c.${nomePropriedade}).Hidden(true);\n`
 }
-
 
 function RetornaColunasGrid(){
     var entradaString = entrada.value;

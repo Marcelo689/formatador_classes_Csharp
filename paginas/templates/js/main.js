@@ -17,6 +17,22 @@ document.addEventListener("DOMContentLoaded", function (e){
     });
 })
 
+function primeiraLetraMinuscula(nome){
+
+    var saida = nome[0].toLowerCase();
+
+    saida += nome.substring(1,nome.length);
+    return saida;
+}
+
+function ehLabelResx(propriedadeFullName){
+    return itemDaListaContemNaPalavra(propriedadeFullName, ["ask", "msg", "label"]);
+}
+
+function naoEhLabelResx(propriedadeFullName){
+    return !ehLabelResx(propriedadeFullName);
+}
+
 function getListProps(classe){
 
     var listaProps = [];
